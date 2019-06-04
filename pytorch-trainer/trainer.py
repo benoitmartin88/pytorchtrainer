@@ -30,7 +30,7 @@ class ModuleTrainer(object):
         self.state = State()
         self.stop_condition = stop_condition
 
-        self.post_epoch_callback = []
+        self.__post_epoch_callback = []
 
         if init_callback is not None:
             if not callable(init_callback):
@@ -54,10 +54,10 @@ class ModuleTrainer(object):
                 iteration_elapsed_time = time() - iteration_start
 
                 if verbose == 1:
-                    self._update_progress_bar(iteration, iteration_elapsed_time, len(train_dataset_loader), max_epochs)
+                    self.__update_progress_bar(iteration, iteration_elapsed_time, len(train_dataset_loader), max_epochs)
 
             self.state.current_epoch += 1
-            self._run_post_epoch_callbacks()
+            self.__run_callbacks(self.__post_epoch_callback)
 
         print("train time %.2f" % (time() - train_start))
 
@@ -67,13 +67,13 @@ class ModuleTrainer(object):
         if not issubclass(callback.__class__, Callback):
             raise TypeError("Argument callback should inherit from Callback.")
 
-        self.post_epoch_callback.append(callback)
+        self.__post_epoch_callback.append(callback)
 
-    def _run_post_epoch_callbacks(self):
-        for cb in self.post_epoch_callback:
+    def __run_callbacks(self, callbacks):
+        for cb in callbacks:
             cb(self)
 
-    def _update_progress_bar(self, iteration, iteration_elapsed_time, train_dataset_loader_size, max_epochs):
+    def __update_progress_bar(self, iteration, iteration_elapsed_time, train_dataset_loader_size, max_epochs):
         remaining_time_estimation = int(iteration_elapsed_time * (train_dataset_loader_size - iteration))
         print_progress(iteration + 1, train_dataset_loader_size,
                        bar_length=25,
@@ -85,7 +85,7 @@ class ModuleTrainer(object):
                                ))
 
 
-def _prepare_batch(batch, device=None, non_blocking=False):
+def __prepare_batch(batch, device=None, non_blocking=False):
     x, y = batch
     assert isinstance(x, torch.Tensor)
     assert isinstance(y, torch.Tensor)
@@ -101,7 +101,7 @@ def _prepare_batch(batch, device=None, non_blocking=False):
 def create_default_trainer(model: nn.Module, optimizer: optim.Optimizer, criterion,
                            device=None, non_blocking=False,
                            stop_condition=NoStopping(),
-                           prepare_batch=_prepare_batch,
+                           prepare_batch=__prepare_batch,
                            output_transform=lambda x, y, y_pred, loss: (x, y, y_pred, loss.item()),
                            init_callback=None):
 

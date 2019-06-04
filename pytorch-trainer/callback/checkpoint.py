@@ -16,14 +16,14 @@ class SaveCheckpointCallback(Callback):
         self.save_directory = save_directory
         self.filename = filename
 
+        os.makedirs(self.save_directory, exist_ok=True)
+
     def __call__(self, trainer):
         if trainer.state.current_epoch % self.save_every == 0:
             self._save_checkpoint(trainer.model, trainer.optimizer, trainer.state)
 
     def _save_checkpoint(self, model: nn.Module, optimizer: optim.Optimizer, trainer_state):
         # from .. import __version__
-
-        os.makedirs(self.save_directory, exist_ok=True)
 
         torch.save({
             'model_state_dict': model.state_dict(),

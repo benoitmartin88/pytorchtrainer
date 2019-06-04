@@ -7,7 +7,7 @@ from torch.utils.data import DataLoader
 from test.common import XorModule, XorDataset
 from trainer import create_default_trainer, ModuleTrainer
 
-from callback.checkpoint import default_save_diretory, default_filename, SaveCheckpointCallback, LoadCheckpointCallback
+from callback import checkpoint, file_writer
 
 
 class TestTrainer(unittest.TestCase):
@@ -29,7 +29,8 @@ class TestTrainer(unittest.TestCase):
 
     def tearDown(self):
         super().tearDown()
-        shutil.rmtree(os.path.join(default_save_diretory), ignore_errors=True)
+        shutil.rmtree(os.path.join(checkpoint.default_save_diretory), ignore_errors=True)
+        shutil.rmtree(os.path.join(file_writer.default_save_diretory), ignore_errors=True)
         del self.model, self.optimizer, self.criterion, self.train_loader
 
     @classmethod
@@ -58,17 +59,17 @@ class TestTrainer(unittest.TestCase):
 
     def test_checkpoint_save(self):
         trainer = create_default_trainer(self.model, self.optimizer, self.criterion)
-        trainer.register_post_epoch_callback(SaveCheckpointCallback(save_every=1))
+        trainer.register_post_epoch_callback(checkpoint.SaveCheckpointCallback(save_every=1))
         trainer.train(self.train_loader, max_epochs=1, verbose=1)
 
-        self.assertTrue(os.path.exists(os.path.join(default_save_diretory, default_filename)))
+        self.assertTrue(os.path.exists(os.path.join(checkpoint.default_save_diretory, checkpoint.default_filename)))
 
     def test_checkpoint_load(self):
         trainer = create_default_trainer(self.model, self.optimizer, self.criterion)
-        trainer.register_post_epoch_callback(SaveCheckpointCallback(save_every=1))
+        trainer.register_post_epoch_callback(checkpoint.SaveCheckpointCallback(save_every=1))
         trainer.train(self.train_loader, max_epochs=1, verbose=1)
 
-        self.assertTrue(os.path.exists(os.path.join(default_save_diretory, default_filename)))
+        self.assertTrue(os.path.exists(os.path.join(checkpoint.default_save_diretory, checkpoint.default_filename)))
 
         del trainer
 
@@ -84,10 +85,21 @@ class TestTrainer(unittest.TestCase):
             global has_callback_been_called
             has_callback_been_called = True
 
-        trainer = create_default_trainer(self.model, self.optimizer, self.criterion, init_callback=LoadCheckpointCallback(callback=_callback))
+        trainer = create_default_trainer(self.model, self.optimizer, self.criterion,
+                                         init_callback=checkpoint.LoadCheckpointCallback(callback=_callback))
 
         self.assertTrue(has_callback_been_called)
 
         trainer.train(self.train_loader, max_epochs=2, verbose=1)
 
         self.assertEqual(2, trainer.state.current_epoch)
+
+    def test_log_save(self):
+        writer = file_writer.CsvWriter(save_every=1, extra_header=['test'], callback=lambda trainer: [42])
+
+        trainer = create_default_trainer(self.model, self.optimizer, self.criterion)
+        trainer.register_post_epoch_callback(writer)
+        trainer.train(self.train_loader, max_epochs=10, verbose=1)
+
+        self.assertTrue(os.path.exists(writer.log_file_path))
+

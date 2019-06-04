@@ -27,7 +27,7 @@ class ModuleTrainer(object):
         self.model = model
         self.optimizer = optimizer
         self.compute_function = compute_function
-        self.state = State
+        self.state = State()
         self.stop_condition = stop_condition
 
         self.post_epoch_callback = []

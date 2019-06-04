@@ -51,7 +51,7 @@ class TestStopCondition(unittest.TestCase):
         early_stopping = MyEarlyStopping()
 
         trainer = create_default_trainer(model, optimizer, criterion, stop_condition=early_stopping)
-        trainer.train(model, train_loader, max_epochs=MAX_EPOCHS, verbose=1)
+        trainer.train(train_loader, max_epochs=MAX_EPOCHS, verbose=1)
 
         self.assertTrue(early_stopping.has_been_triggered)
         self.assertTrue(early_stopping.counter == early_stopping.patience)

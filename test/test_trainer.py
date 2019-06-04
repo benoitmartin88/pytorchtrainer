@@ -30,6 +30,7 @@ class TestTrainer(unittest.TestCase):
     def tearDown(self):
         super().tearDown()
         shutil.rmtree(os.path.join(default_save_diretory), ignore_errors=True)
+        del self.model, self.optimizer, self.criterion, self.train_loader
 
     @classmethod
     def setUpClass(cls):

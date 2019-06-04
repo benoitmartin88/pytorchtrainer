@@ -13,28 +13,38 @@ class State(object):
 
 
 class ModuleTrainer(object):
-    def __init__(self, compute_function, state=State, stop_condition=NoStopping()):
+    def __init__(self, model, optimizer, compute_function,
+                 state=State,
+                 stop_condition=NoStopping(),
+                 post_init_callback=None):
         if not callable(compute_function):
             raise TypeError("Argument compute_function should be a function.")
 
         if not callable(stop_condition):
             raise TypeError("Argument stop_condition should be a function.")
 
+        self.model = model
+        self.optimizer = optimizer
         self.compute_function = compute_function
         self.state = state
         self.stop_condition = stop_condition
 
-    def resume_training(self, state):
-        raise NotImplementedError()     # TODO
+        self.post_epoch_callback = []
 
-    def train(self, model, train_dataset_loader, max_epochs=100, verbose=1):
-        model.train()  # set the module to training mode
+        if post_init_callback is not None:
+            if not callable(post_init_callback):
+                raise TypeError("Argument post_init_callback should be a function.")
+
+            post_init_callback(self)
+
+    def train(self, train_dataset_loader, max_epochs=100, verbose=1):
+        self.model.train()  # set the module to training mode
 
         train_start = time()
         while self.state.current_epoch < max_epochs and not self.stop_condition(self.state):
-            model.zero_grad()
+            self.model.zero_grad()
 
-            for i, batch in enumerate(train_dataset_loader, 0):
+            for iteration, batch in enumerate(train_dataset_loader, 0):
                 iteration_start = time()
 
                 # Run the actual compute function
@@ -43,11 +53,24 @@ class ModuleTrainer(object):
                 iteration_elapsed_time = time() - iteration_start
 
                 if verbose == 1:
-                    self._update_progress_bar(i, iteration_elapsed_time, len(train_dataset_loader), max_epochs)
+                    self._update_progress_bar(iteration, iteration_elapsed_time, len(train_dataset_loader), max_epochs)
 
             self.state.current_epoch += 1
+            self._run_post_epoch_callbacks()
 
         print("train time %.2f" % (time() - train_start))
+
+    def register_post_epoch_callback(self, callback):
+        from callback import Callback
+
+        if not issubclass(callback.__class__, Callback):
+            raise TypeError("Argument callback should inherit from Callback.")
+
+        self.post_epoch_callback.append(callback)
+
+    def _run_post_epoch_callbacks(self):
+        for cb in self.post_epoch_callback:
+            cb(self)
 
     def _update_progress_bar(self, iteration, iteration_elapsed_time, train_dataset_loader_size, max_epochs):
         remaining_time_estimation = int(iteration_elapsed_time * (train_dataset_loader_size - iteration))
@@ -98,5 +121,6 @@ def create_default_trainer(model, optimizer, criterion,
         optimizer.step()
         return output_transform(x, y, y_pred, loss)
 
-    return ModuleTrainer(compute_function=_default_compute_function, stop_condition=stop_condition)
-
+    return ModuleTrainer(model, optimizer,
+                         compute_function=_default_compute_function,
+                         stop_condition=stop_condition)

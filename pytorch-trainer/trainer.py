@@ -2,6 +2,8 @@ import datetime
 from time import time
 
 import torch
+import torch.nn as nn
+import torch.optim as optim
 
 from stop_condition import NoStopping
 from utils import print_progress
@@ -13,10 +15,9 @@ class State(object):
 
 
 class ModuleTrainer(object):
-    def __init__(self, model, optimizer, compute_function,
-                 state=State,
+    def __init__(self, model: nn.Module, optimizer: optim.Optimizer, compute_function,
                  stop_condition=NoStopping(),
-                 post_init_callback=None):
+                 init_callback=None):
         if not callable(compute_function):
             raise TypeError("Argument compute_function should be a function.")
 
@@ -26,16 +27,16 @@ class ModuleTrainer(object):
         self.model = model
         self.optimizer = optimizer
         self.compute_function = compute_function
-        self.state = state
+        self.state = State
         self.stop_condition = stop_condition
 
         self.post_epoch_callback = []
 
-        if post_init_callback is not None:
-            if not callable(post_init_callback):
+        if init_callback is not None:
+            if not callable(init_callback):
                 raise TypeError("Argument post_init_callback should be a function.")
 
-            post_init_callback(self)
+            init_callback(self)
 
     def train(self, train_dataset_loader, max_epochs=100, verbose=1):
         self.model.train()  # set the module to training mode
@@ -97,11 +98,12 @@ def _prepare_batch(batch, device=None, non_blocking=False):
     return x, y
 
 
-def create_default_trainer(model, optimizer, criterion,
+def create_default_trainer(model: nn.Module, optimizer: optim.Optimizer, criterion,
                            device=None, non_blocking=False,
                            stop_condition=NoStopping(),
                            prepare_batch=_prepare_batch,
-                           output_transform=lambda x, y, y_pred, loss: (x, y, y_pred, loss.item())):
+                           output_transform=lambda x, y, y_pred, loss: (x, y, y_pred, loss.item()),
+                           init_callback=None):
 
     if not callable(prepare_batch):
         raise TypeError("Argument prepare_batch should be a function.")
@@ -123,4 +125,5 @@ def create_default_trainer(model, optimizer, criterion,
 
     return ModuleTrainer(model, optimizer,
                          compute_function=_default_compute_function,
-                         stop_condition=stop_condition)
+                         stop_condition=stop_condition,
+                         init_callback=init_callback)

@@ -1,7 +1,7 @@
 
 class EarlyStopping(object):
     def __init__(self, patience=10,
-                 metric=lambda state: state.last_loss,
+                 metric=lambda state: state.last_train_loss,
                  comparison_function=lambda metric, best: metric >= best):
         if patience < 1:
             raise ValueError("Argument patience should be positive integer.")

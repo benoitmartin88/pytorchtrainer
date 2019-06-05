@@ -2,22 +2,23 @@ import unittest
 import torch
 from torch.utils.data import DataLoader
 
-from stop_condition import EarlyStopping
+from callback import ValidationCallback
+from metric import MeanAbsoluteError
 from test.common import XorModule, XorDataset
 from trainer import create_default_trainer
 
 
-class MyEarlyStopping(EarlyStopping):
-    def __init__(self):
-        super().__init__(patience=10)
-        self.has_been_triggered = False
+class MyValidationCallback(ValidationCallback):
+    def __init__(self, dataset_loader, metric, validate_every):
+        super().__init__(dataset_loader, metric, validate_every=validate_every)
+        self.has_been_called = False
 
-    def __call__(self, state):
-        self.has_been_triggered = super().__call__(state)
-        return self.has_been_triggered
+    def __call__(self, trainer):
+        super().__call__(trainer)
+        self.has_been_called = True
 
 
-class TestStopCondition(unittest.TestCase):
+class TestCallback(unittest.TestCase):
 
     def setUp(self):
         super().setUp()
@@ -46,15 +47,12 @@ class TestStopCondition(unittest.TestCase):
     def tearDownClass(cls):
         super().tearDownClass()
 
-    def test_early_stopping(self):
-        MAX_EPOCHS = 1000
+    def test_validation(self):
+        validation_callback = MyValidationCallback(self.train_loader, MeanAbsoluteError(), validate_every=1)
 
-        early_stopping = MyEarlyStopping()
+        trainer = create_default_trainer(self.model, self.optimizer, self.criterion)
+        trainer.register_post_iteration_callback(validation_callback)
+        trainer.train(self.train_loader, max_epochs=1, verbose=1)
 
-        trainer = create_default_trainer(self.model, self.optimizer, self.criterion, stop_condition=early_stopping)
-        trainer.train(self.train_loader, max_epochs=MAX_EPOCHS, verbose=1)
-
-        self.assertTrue(early_stopping.has_been_triggered)
-        self.assertTrue(early_stopping.counter == early_stopping.patience)
-        self.assertNotEqual(early_stopping.best_score, float('inf'))
-        self.assertTrue(trainer.state.current_epoch < MAX_EPOCHS)
+        self.assertTrue(validation_callback.has_been_called)
+        self.assertTrue(trainer.state.last_validation_loss != float('inf'))

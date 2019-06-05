@@ -1,3 +1,18 @@
+import torch
+
+
+def batch_to_tensor(batch, device=None, non_blocking=False):
+    x, y = batch
+    assert isinstance(x, torch.Tensor)
+    assert isinstance(y, torch.Tensor)
+
+    if device is None:
+        device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
+
+    x = x.to(device=device, non_blocking=non_blocking)
+    y = y.to(device=device, non_blocking=non_blocking)
+    return x, y
+
 
 def print_progress(iteration, total, prefix='', suffix='', decimals=1, bar_length=100):
     """

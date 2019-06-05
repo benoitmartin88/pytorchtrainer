@@ -22,7 +22,7 @@ class CsvWriter(Callback):
         os.makedirs(save_directory, exist_ok=True)
 
         with open(self.log_file_path, mode='w') as writer:
-            header = ['timestamp', 'epoch', 'loss']
+            header = ['timestamp', 'epoch', 'train loss', 'validation loss']
             if extra_header is not None:
                 if not isinstance(extra_header, list):
                     raise TypeError("extra_header should be a list.")
@@ -45,4 +45,4 @@ class CsvWriter(Callback):
                 if not isinstance(extra, list):
                     raise TypeError("callback should return a list.")
 
-            writer.writerow([time.time(), trainer_state.current_epoch, trainer_state.last_loss] + extra)
+            writer.writerow([time.time(), trainer_state.current_epoch, trainer_state.last_train_loss, trainer_state.last_validation_loss] + extra)

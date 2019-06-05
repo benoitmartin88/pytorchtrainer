@@ -2,7 +2,7 @@ import unittest
 import torch
 from torch.utils.data import DataLoader
 
-from stop_condition.early_stopping import EarlyStopping
+from stop_condition import EarlyStopping
 from test.common import XorModule, XorDataset
 from trainer import create_default_trainer
 

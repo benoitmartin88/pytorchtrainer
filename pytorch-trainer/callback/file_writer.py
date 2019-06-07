@@ -39,7 +39,7 @@ class CsvWriter(Callback):
         with open(self.log_file_path, mode='a') as writer:
             writer = csv.writer(writer, delimiter=self.delimiter, quotechar='"', quoting=csv.QUOTE_MINIMAL)
 
-            extra = None
+            extra = []
             if self.callback is not None:
                 extra = self.callback(self)
                 if not isinstance(extra, list):

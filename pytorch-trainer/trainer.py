@@ -15,6 +15,13 @@ class State(object):
     last_train_loss = float("inf")
     last_validation_loss = float("inf")
 
+    def set(self, state):
+        if not isinstance(state, State):
+            raise TypeError("state argument should be of type State.")
+
+        for k, v in state.__dict__.items():
+            setattr(self, k, v)
+
 
 class ModuleTrainer(object):
     def __init__(self, model: nn.Module, optimizer: optim.Optimizer, train_function,

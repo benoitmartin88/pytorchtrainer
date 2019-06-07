@@ -63,4 +63,4 @@ class LoadCheckpointCallback(Callback):
 
         model.load_state_dict(checkpoint['model_state_dict'])
         optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
-        state = checkpoint['trainer_state']
+        state.set(checkpoint['trainer_state'])

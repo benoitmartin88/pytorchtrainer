@@ -1,7 +1,7 @@
 import datetime
 from time import time
+import signal
 
-import torch
 import torch.nn as nn
 import torch.optim as optim
 
@@ -25,6 +25,8 @@ class ModuleTrainer(object):
 
         if not callable(stop_condition):
             raise TypeError("Argument stop_condition should be a function.")
+
+        signal.signal(signal.SIGINT, self.__graceful_exit)
 
         self.state = State()
         self.model = model
@@ -81,6 +83,10 @@ class ModuleTrainer(object):
             raise TypeError("Argument callback should inherit from Callback.")
 
         self.__post_epoch_callback.append(callback)
+
+    def __graceful_exit(self, signum, frame):
+        print("Sig %s caught. Graceful exit has been called. Currently running epoch will be finished." % signum)
+        self.stop_condition = lambda state: True
 
     def __run_callbacks(self, callbacks):
         for cb in callbacks:

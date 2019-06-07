@@ -13,3 +13,4 @@ class Metric(object):
 
 
 from .mean_absolute_error import MeanAbsoluteError
+from .loss import Loss

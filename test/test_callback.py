@@ -3,7 +3,7 @@ import torch
 from torch.utils.data import DataLoader
 
 from callback import ValidationCallback
-from metric import MeanAbsoluteError
+from metric import Loss
 from test.common import XorModule, XorDataset
 from trainer import create_default_trainer
 
@@ -48,11 +48,12 @@ class TestCallback(unittest.TestCase):
         super().tearDownClass()
 
     def test_validation(self):
-        validation_callback = MyValidationCallback(self.train_loader, MeanAbsoluteError(), validate_every=1)
+        validation_callback = MyValidationCallback(self.train_loader, Loss(self.criterion), validate_every=1)
 
         trainer = create_default_trainer(self.model, self.optimizer, self.criterion)
         trainer.register_post_iteration_callback(validation_callback)
-        trainer.train(self.train_loader, max_epochs=1, verbose=1)
+        trainer.register_post_epoch_callback(validation_callback)
+        trainer.train(self.train_loader, max_epochs=5, verbose=1)
 
         self.assertTrue(validation_callback.has_been_called)
         self.assertTrue(trainer.state.last_validation_loss != float('inf'))

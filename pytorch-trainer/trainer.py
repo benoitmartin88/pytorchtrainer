@@ -91,10 +91,10 @@ class ModuleTrainer(object):
         print_progress(self.state.current_iteration + 1, train_dataset_loader_size,
                        bar_length=25,
                        prefix="epoch %d/%d" % (self.state.current_epoch + 1, max_epochs),
-                       suffix="%d/%d | %.2f s/it | %s remaining | last loss %.4f " %
+                       suffix="%d/%d | %.2f s/it | %s remaining | loss (t/v) %.4f/%.4f " %
                               (self.state.current_iteration + 1, train_dataset_loader_size, iteration_elapsed_time,
                                str(datetime.timedelta(seconds=remaining_time_estimation)),
-                               self.state.last_train_loss
+                               self.state.last_train_loss, self.state.last_validation_loss
                                ))
 
 

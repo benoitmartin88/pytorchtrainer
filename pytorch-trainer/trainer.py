@@ -13,7 +13,7 @@ class State(object):
     current_epoch = 0
     current_iteration = 0
     last_train_loss = float("inf")
-    last_validation_loss = float("inf")
+    # last_validation_loss = float("inf")
 
     def set(self, state):
         if not isinstance(state, State):
@@ -21,6 +21,12 @@ class State(object):
 
         for k, v in state.__dict__.items():
             setattr(self, k, v)
+
+    def add_attribute(self, attribute_name: str, value):
+        setattr(self, attribute_name, value)
+
+    def get(self, attribute_name: str):
+        return getattr(self, attribute_name)
 
 
 class ModuleTrainer(object):
@@ -107,7 +113,8 @@ class ModuleTrainer(object):
                        suffix="%d/%d | %.2f s/it | %s remaining | loss (t/v) %.4f/%.4f " %
                               (self.state.current_iteration + 1, train_dataset_loader_size, iteration_elapsed_time,
                                str(datetime.timedelta(seconds=remaining_time_estimation)),
-                               self.state.last_train_loss, self.state.last_validation_loss
+                               self.state.last_train_loss,
+                               self.state.last_validation_loss if hasattr(self.state, "last_validation_loss") else float('inf')
                                ))
 
 

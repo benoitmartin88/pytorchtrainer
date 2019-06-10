@@ -8,10 +8,12 @@ from trainer import State
 
 default_save_diretory = './checkpoint'
 default_filename = 'checkpoint.pt.tar'
+default_best_filename = 'best.pt.tar'
 
 
 class SaveCheckpointCallback(Callback):
     def __init__(self, save_every=10, save_directory=default_save_diretory, filename=default_filename):
+        super().__init__()
         self.save_every = save_every
         self.save_directory = save_directory
         self.filename = filename

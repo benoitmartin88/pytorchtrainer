@@ -2,6 +2,9 @@ import torch
 
 
 class Metric(object):
+    def __init__(self, name: str):
+        self.name = name.replace(' ', '_')
+
     def step(self, y: torch.Tensor, y_pred: torch.Tensor):
         raise NotImplementedError()
 

@@ -5,6 +5,7 @@ from metric import Metric
 
 class Loss(Metric):
     def __init__(self, loss_function):
+        super().__init__("loss")
         self.loss_function = loss_function
         self._loss_sum = 0.
         self._total = 0

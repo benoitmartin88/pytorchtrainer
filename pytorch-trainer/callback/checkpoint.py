@@ -66,3 +66,34 @@ class LoadCheckpointCallback(Callback):
         model.load_state_dict(checkpoint['model_state_dict'])
         optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
         state.set(checkpoint['trainer_state'])
+
+
+class SaveBestCheckpointCallback(SaveCheckpointCallback):
+    def __init__(self, state_metric_name: str, saves_to_keep=5, comparison_function=lambda metric, best: metric < best,
+                 save_directory=default_save_diretory, filename=default_best_filename):
+        super().__init__(0, save_directory, filename)
+        self.state_metric_name = state_metric_name
+        # self.saves_to_keep = saves_to_keep    # TODO
+        self.comparison_function = comparison_function
+        self.current_best = None
+
+        os.makedirs(self.save_directory, exist_ok=True)
+
+    def __call__(self, trainer):
+        """
+        best.pt.tar -> best_METRIC_EPOCH_1.pt.tar
+        :param trainer:
+        :return:
+        """
+        if self.current_best is None or self.comparison_function(trainer.state.last_train_loss, self.current_best):
+            self.current_best = trainer.state.get(self.state_metric_name)
+
+            old_filename = self.filename
+            self.filename = self._get_filename(trainer.state)
+            self._save_checkpoint(trainer.model, trainer.optimizer, trainer.state)
+            self.filename = old_filename
+
+    def _get_filename(self, state: State):
+        base, ext = self.filename.rsplit('.', 1)    # TODO: this is wrong
+        return base + "_%.2f_%d_%d." % (state.last_train_loss, state.current_epoch, 1) + ext
+

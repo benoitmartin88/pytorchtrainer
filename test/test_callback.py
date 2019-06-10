@@ -1,8 +1,10 @@
+import os
+import shutil
 import unittest
 import torch
 from torch.utils.data import DataLoader
 
-from callback import ValidationCallback
+from callback import ValidationCallback, SaveBestCheckpointCallback, checkpoint, file_writer
 from metric import Loss
 from test.common import XorModule, XorDataset
 from trainer import create_default_trainer
@@ -11,6 +13,16 @@ from trainer import create_default_trainer
 class MyValidationCallback(ValidationCallback):
     def __init__(self, dataset_loader, metric, validate_every):
         super().__init__(dataset_loader, metric, validate_every=validate_every)
+        self.has_been_called = False
+
+    def __call__(self, trainer):
+        super().__call__(trainer)
+        self.has_been_called = True
+
+
+class MySaveBestCheckpointCallback(SaveBestCheckpointCallback):
+    def __init__(self, state_metric_name, saves_to_keep):
+        super().__init__(state_metric_name, saves_to_keep=saves_to_keep)
         self.has_been_called = False
 
     def __call__(self, trainer):
@@ -59,3 +71,15 @@ class TestCallback(unittest.TestCase):
 
         self.assertTrue(validation_callback.has_been_called)
         self.assertTrue(trainer.state.last_validation_loss != float('inf'))
+
+    def test_save_best(self):
+        validation_callback = ValidationCallback(self.train_loader, Loss(self.criterion), validate_every=1)
+        callback = MySaveBestCheckpointCallback(validation_callback.state_attribute_name, saves_to_keep=1)
+
+        trainer = create_default_trainer(self.model, self.optimizer, self.criterion)
+        trainer.register_post_epoch_callback(validation_callback)
+        trainer.register_post_epoch_callback(callback)
+        trainer.train(self.train_loader, max_epochs=10, verbose=1)
+
+        self.assertTrue(callback.has_been_called)
+

@@ -13,7 +13,7 @@ class Callback(object):
         trainer.state.add_attribute(state_name, value)
 
 
-from .checkpoint import SaveCheckpointCallback, LoadCheckpointCallback
+from .checkpoint import SaveCheckpointCallback, LoadCheckpointCallback, SaveBestCheckpointCallback
 from .file_writer import CsvWriter
 from .validation import ValidationCallback
 

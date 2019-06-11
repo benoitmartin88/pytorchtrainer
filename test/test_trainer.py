@@ -57,6 +57,12 @@ class TestTrainer(unittest.TestCase):
 
         self._evaluate_model(self.model, self.train_loader)
 
+    def test_dtype(self):
+        for dtype in [torch.float32, torch.float64]:
+            trainer = create_default_trainer(self.model, self.optimizer, self.criterion, dtype=dtype)
+            trainer.train(self.train_loader, max_epochs=5, verbose=1)
+            del trainer
+
     def test_checkpoint_save(self):
         trainer = create_default_trainer(self.model, self.optimizer, self.criterion)
         trainer.register_post_epoch_callback(checkpoint.SaveCheckpointCallback(save_every=1))

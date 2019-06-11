@@ -1,3 +1,4 @@
+import collections
 import datetime
 from time import time
 import signal
@@ -119,7 +120,7 @@ class ModuleTrainer(object):
 
 
 def create_default_trainer(model: nn.Module, optimizer: optim.Optimizer, criterion,
-                           device=None, non_blocking=False,
+                           device=None, dtype=None, non_blocking=False,
                            stop_condition=NoStopping(),
                            prepare_batch=batch_to_tensor,
                            output_transform=lambda x, y, y_pred, loss: (x, y, y_pred, loss.item()),
@@ -133,10 +134,16 @@ def create_default_trainer(model: nn.Module, optimizer: optim.Optimizer, criteri
     if device:
         model.to(device)
 
+    if dtype:
+        model.to(dtype=dtype)
+
+    # reset optimizer state
+    optimizer.state = collections.defaultdict(dict)
+
     def _default_train_function(batch):
         model.train()
         optimizer.zero_grad()
-        x, y = prepare_batch(batch, device=device, non_blocking=non_blocking)
+        x, y = prepare_batch(batch, device=device, dtype=dtype, non_blocking=non_blocking)
         y_pred = model(x)
         loss = criterion(y_pred, y)
         loss.backward()

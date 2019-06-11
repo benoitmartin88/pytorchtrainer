@@ -94,6 +94,7 @@ class SaveBestCheckpointCallback(SaveCheckpointCallback):
             self.filename = old_filename
 
     def _get_filename(self, state: State):
-        base, ext = self.filename.rsplit('.', 1)    # TODO: this is wrong
-        return base + "_%.2f_%d_%d." % (state.last_train_loss, state.current_epoch, 1) + ext
+        c = self.filename.count('.')
+        base, *ext = self.filename.rsplit('.', c)
+        return base + "_%d_%.2f_%d." % (state.current_epoch, state.last_train_loss, 1) + '.'.join(ext)
 

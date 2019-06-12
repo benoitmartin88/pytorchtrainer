@@ -70,7 +70,7 @@ class ModuleTrainer(object):
                 # Run the actual compute function
                 _, _, _, self.state.last_train_loss = self.train_function(batch)
 
-                self.__run_callbacks(self.__post_iteration_callback)
+                self.__run_post_iteration_callbacks()
 
                 iteration_elapsed_time = time() - iteration_start
 
@@ -78,7 +78,7 @@ class ModuleTrainer(object):
                     self.__update_progress_bar(iteration_elapsed_time, len(train_dataset_loader), max_epochs)
 
             self.state.current_epoch += 1
-            self.__run_callbacks(self.__post_epoch_callback)
+            self.__run_post_epoch_callbacks()
 
         print("train time %.2f" % (time() - train_start))
 
@@ -102,9 +102,15 @@ class ModuleTrainer(object):
         print("Sig %s caught. Graceful exit has been called. Currently running epoch will be finished." % signum)
         self.stop_condition = lambda state: True
 
-    def __run_callbacks(self, callbacks):
-        for cb in callbacks:
-            cb(self)
+    def __run_post_iteration_callbacks(self):
+        for cb in self.__post_iteration_callback:
+            if self.state.current_iteration % cb.frequency == 0:
+                cb(self)
+
+    def __run_post_epoch_callbacks(self):
+        for cb in self.__post_epoch_callback:
+            if cb.frequency != 0 and self.state.current_epoch % cb.frequency == 0:
+                cb(self)
 
     def __update_progress_bar(self, iteration_elapsed_time, train_dataset_loader_size, max_epochs):
         remaining_time_estimation = int(iteration_elapsed_time * (train_dataset_loader_size - self.state.current_iteration))

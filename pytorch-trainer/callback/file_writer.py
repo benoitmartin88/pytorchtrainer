@@ -13,6 +13,7 @@ default_filename = 'log.cvs'
 class CsvWriter(Callback):
     def __init__(self, save_every=10, save_directory=default_save_diretory, filename=default_filename, delimiter=';',
                  extra_header=None, callback=None):
+        super().__init__(frequency=save_every)
         self.save_every = save_every
         file, ext = filename.rsplit('.', 1)
         self.log_file_path = os.path.join(save_directory, file + '_' + time.strftime("%Y%M%d_%H%M%S") + '.' + ext)
@@ -32,8 +33,7 @@ class CsvWriter(Callback):
             writer.writerow(header)
 
     def __call__(self, trainer):
-        if trainer.state.current_epoch % self.save_every == 0:
-            self.__save(trainer.model, trainer.optimizer, trainer.state)
+        self.__save(trainer.model, trainer.optimizer, trainer.state)
 
     def __save(self, model: nn.Module, optimizer: optim.Optimizer, trainer_state):
         with open(self.log_file_path, mode='a') as writer:

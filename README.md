@@ -11,7 +11,7 @@ Available features:
 
 
 TODO:
-- [ ] `SaveBestCheckpointCallback`: take into account `saves_to_keep
+- [ ] `SaveBestCheckpointCallback`: take into account `saves_to_keep`
 
 
 

@@ -4,12 +4,12 @@ import time
 
 from callback import Callback
 
-default_save_diretory = './log'
+default_save_directory = './log'
 default_filename = 'log.cvs'
 
 
 class CsvWriter(Callback):
-    def __init__(self, save_every=10, save_directory=default_save_diretory, filename=default_filename, delimiter=';',
+    def __init__(self, save_every=10, save_directory=default_save_directory, filename=default_filename, delimiter=';',
                  extra_header=None, callback=None):
         super().__init__(frequency=save_every)
         self.save_every = save_every

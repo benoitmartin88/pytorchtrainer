@@ -58,14 +58,17 @@ class TestCallback(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         super().tearDownClass()
-        # shutil.rmtree(os.path.join(checkpoint.default_save_diretory), ignore_errors=True)
-        # shutil.rmtree(os.path.join(file_writer.default_save_diretory), ignore_errors=True)
+        shutil.rmtree(os.path.join(checkpoint.default_save_diretory), ignore_errors=True)
+        shutil.rmtree(os.path.join(file_writer.default_save_directory), ignore_errors=True)
 
     def test_validation(self):
         validation_callback = MyValidationCallback(self.train_loader, Loss(self.criterion), validate_every=1)
 
         trainer = create_default_trainer(self.model, self.optimizer, self.criterion)
         trainer.register_post_iteration_callback(validation_callback)
+        trainer.register_post_iteration_callback(file_writer.CsvWriter(save_every=1,
+                                                                       extra_header=[validation_callback.state_attribute_name],
+                                                                       callback=lambda state: [state.get(validation_callback.state_attribute_name)]))
         trainer.register_post_epoch_callback(validation_callback)
         trainer.train(self.train_loader, max_epochs=5, verbose=1)
 

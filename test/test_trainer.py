@@ -4,10 +4,10 @@ import unittest
 import torch
 from torch.utils.data import DataLoader
 
-from test.common import XorModule, XorDataset
-from trainer import create_default_trainer, ModuleTrainer
+from pytorchtrainer import create_default_trainer, ModuleTrainer
+from pytorchtrainer.callback import checkpoint, file_writer
 
-from callback import checkpoint, file_writer
+from test.common import XorModule, XorDataset
 
 
 class TestTrainer(unittest.TestCase):
@@ -84,7 +84,7 @@ class TestTrainer(unittest.TestCase):
 
         # load from checkpoint
         def _callback(trainer: ModuleTrainer):
-            from stop_condition.early_stopping import EarlyStopping
+            from pytorchtrainer.stop_condition import EarlyStopping
             trainer.stop_condition = EarlyStopping()
             trainer.optimizer.lr_scheduler = 1e-3
 

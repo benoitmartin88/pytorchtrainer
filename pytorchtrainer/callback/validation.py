@@ -1,6 +1,6 @@
 import torch
-from callback import Callback
-from utils import batch_to_tensor
+from . import Callback
+from ..utils import batch_to_tensor
 
 
 class ValidationCallback(Callback):

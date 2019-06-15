@@ -2,9 +2,10 @@ import unittest
 import torch
 from torch.utils.data import DataLoader
 
-from stop_condition import EarlyStopping
+from pytorchtrainer import create_default_trainer
+from pytorchtrainer.stop_condition import EarlyStopping
+
 from test.common import XorModule, XorDataset
-from trainer import create_default_trainer
 
 
 class MyEarlyStopping(EarlyStopping):

@@ -1,6 +1,6 @@
 import torch
 
-from metric import Metric
+from . import Metric
 
 
 class Loss(Metric):

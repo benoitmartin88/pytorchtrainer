@@ -2,7 +2,7 @@ import os
 import csv
 import time
 
-from callback import Callback
+from . import Callback
 
 default_save_directory = './log'
 default_filename = 'log.cvs'

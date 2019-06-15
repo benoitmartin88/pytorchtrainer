@@ -4,10 +4,11 @@ import unittest
 import torch
 from torch.utils.data import DataLoader
 
-from callback import ValidationCallback, SaveBestCheckpointCallback, checkpoint, file_writer
-from metric import Loss
+from pytorchtrainer import create_default_trainer
+from pytorchtrainer.callback import ValidationCallback, SaveBestCheckpointCallback, checkpoint, file_writer
+from pytorchtrainer.metric import Loss
+
 from test.common import XorModule, XorDataset
-from trainer import create_default_trainer
 
 
 class MyValidationCallback(ValidationCallback):

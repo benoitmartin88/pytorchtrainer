@@ -1,4 +1,4 @@
-from trainer import ModuleTrainer
+from .. import ModuleTrainer
 
 
 class Callback(object):

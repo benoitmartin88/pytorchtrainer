@@ -3,8 +3,8 @@ import torch.nn as nn
 import torch.optim as optim
 import os
 
-from callback import Callback
-from trainer import State
+from . import Callback
+from .. import State
 
 default_save_diretory = './checkpoint'
 default_filename = 'checkpoint.pt.tar'

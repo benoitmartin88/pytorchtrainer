@@ -6,8 +6,8 @@ import signal
 import torch.nn as nn
 import torch.optim as optim
 
-from stop_condition import NoStopping
-from utils import print_progress, batch_to_tensor
+from .stop_condition import NoStopping
+from .utils import print_progress, batch_to_tensor
 
 
 class State(object):
@@ -83,7 +83,7 @@ class ModuleTrainer(object):
         print("train time %.2f" % (time() - train_start))
 
     def register_post_iteration_callback(self, callback):
-        from callback import Callback
+        from .callback import Callback
 
         if not issubclass(callback.__class__, Callback):
             raise TypeError("Argument callback should inherit from Callback.")
@@ -91,7 +91,7 @@ class ModuleTrainer(object):
         self.__post_iteration_callback.append(callback)
 
     def register_post_epoch_callback(self, callback):
-        from callback import Callback
+        from .callback import Callback
 
         if not issubclass(callback.__class__, Callback):
             raise TypeError("Argument callback should inherit from Callback.")

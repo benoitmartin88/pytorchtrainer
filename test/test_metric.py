@@ -22,7 +22,7 @@ class TestMetric(unittest.TestCase):
         super().tearDownClass()
 
     def test_mean_absolute_error(self):
-        from metric.mean_absolute_error import MeanAbsoluteError
+        from pytorchtrainer.metric import MeanAbsoluteError
         mea = MeanAbsoluteError()
         mea.step(torch.tensor([[1]]), torch.tensor([[1]]))
 

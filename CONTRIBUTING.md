@@ -21,8 +21,7 @@ looking through interesting issues.
 
 Before sending your pull request for
 [review](https://github.com/benoitmartin88/pytorch-trainer/pulls),
-make sure your changes are consistent with the guidelines and follow the
-TensorFlow coding style.
+make sure your changes are consistent with the guidelines and follow the coding style.
 
 #### General guidelines and philosophy for contribution
 
@@ -42,4 +41,4 @@ by `test_` in order to comply with unittest's `test_*.py` pattern.
 
 
 All the unit tests can be run using the following command from the repository root: 
-`PYTHONPATH=pytorch-trainer python -m unittest discover -s test/`
+`python -m unittest`

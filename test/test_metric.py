@@ -21,6 +21,34 @@ class TestMetric(unittest.TestCase):
     def tearDownClass(cls):
         super().tearDownClass()
 
+    def test_accuracy(self):
+        from pytorchtrainer.metric import Accuracy
+        accuracy = Accuracy()
+        accuracy.step(torch.tensor([[1]]), torch.tensor([[1]]))
+
+        self.assertEqual(1, accuracy._total)
+        self.assertEqual(1, accuracy._total_correct)
+        self.assertEqual(1.0, accuracy.compute())
+
+        accuracy.reset()
+        self.assertEqual(0, accuracy._total)
+        self.assertEqual(0, accuracy._total_correct)
+
+        accuracy.step(torch.tensor([[1]]), torch.tensor([[2]]))
+        self.assertEqual(1, accuracy._total)
+        self.assertEqual(0, accuracy._total_correct)
+        self.assertEqual(0.0, accuracy.compute())
+
+        accuracy.step(torch.tensor([[2]]), torch.tensor([[2]]))
+        self.assertEqual(2, accuracy._total)
+        self.assertEqual(1, accuracy._total_correct)
+        self.assertEqual(0.5, accuracy.compute())
+
+        accuracy.step(torch.tensor([[1], [1]]), torch.tensor([[1], [3]]))
+        self.assertEqual(4, accuracy._total)
+        self.assertEqual(2, accuracy._total_correct)
+        self.assertEqual(0.5, accuracy.compute())
+
     def test_mean_absolute_error(self):
         from pytorchtrainer.metric import MeanAbsoluteError
         mea = MeanAbsoluteError()

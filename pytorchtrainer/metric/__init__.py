@@ -15,5 +15,6 @@ class Metric(object):
         raise NotImplementedError()
 
 
+from .accuracy import Accuracy
 from .mean_absolute_error import MeanAbsoluteError
 from .loss import Loss

@@ -8,7 +8,7 @@ You will also benefit from the following features:
 - Early stopping: stop training after a period of stagnation
 - Checkpointing: save model and estimator at regular intervals
 - CSV file writer to output logs
-- Several metrics are available: all default PyTorch loss functions, MAE
+- Several metrics are available: all default PyTorch loss functions, Accuracy, MAE
 - Progress bar from console
 - SIGINT handling: handle CTRL-C
 - Model's data type (`float32`, `float64`) 

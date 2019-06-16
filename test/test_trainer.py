@@ -5,7 +5,8 @@ import torch
 from torch.utils.data import DataLoader
 
 from pytorchtrainer import create_default_trainer, ModuleTrainer
-from pytorchtrainer.callback import checkpoint, file_writer
+from pytorchtrainer.callback import checkpoint, file_writer, MetricCallback
+from pytorchtrainer.metric import Accuracy
 
 from test.common import XorModule, XorDataset
 
@@ -26,6 +27,8 @@ class TestTrainer(unittest.TestCase):
                                        batch_size=1,
                                        num_workers=1
                                        )
+
+        self.prediction_transform = lambda x: int(round(x.item()))
 
     def tearDown(self):
         super().tearDown()
@@ -49,7 +52,7 @@ class TestTrainer(unittest.TestCase):
                 x, y = batch[0], batch[1]
                 y_pred = model(x)
                 print("x=%s, y=%s" % (x, y_pred.item()))
-                self.assertEqual(int(round(y_pred.item())), int(y.item()))
+                self.assertEqual(self.prediction_transform(y_pred.item()), int(y.item()))
 
     def test_xor(self):
         trainer = create_default_trainer(self.model, self.optimizer, self.criterion)

@@ -13,8 +13,10 @@ from .utils import print_progress, batch_to_tensor
 class State(object):
     current_epoch = 0
     current_iteration = 0
+    last_x = None
+    last_y = None
+    last_y_pred = None
     last_train_loss = float("inf")
-    # last_validation_loss = float("inf")
 
     def set(self, state):
         if not isinstance(state, State):
@@ -68,7 +70,7 @@ class ModuleTrainer(object):
                 iteration_start = time()
 
                 # Run the actual compute function
-                _, _, _, self.state.last_train_loss = self.train_function(batch)
+                self.state.last_x, self.state.last_y, self.state.last_y_pred, self.state.last_train_loss = self.train_function(batch)
 
                 self.__run_post_iteration_callbacks()
 

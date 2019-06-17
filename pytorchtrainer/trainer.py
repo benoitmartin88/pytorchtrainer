@@ -183,6 +183,9 @@ def create_default_trainer(model: nn.Module, optimizer: optim.Optimizer, criteri
     if not callable(output_transform):
         raise TypeError("Argument output_transform should be a function.")
 
+    if device is None:
+        device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
+
     if device:
         model.to(device)
 

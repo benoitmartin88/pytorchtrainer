@@ -6,9 +6,6 @@ def batch_to_tensor(batch, device=None, non_blocking=False, dtype=None):
     assert isinstance(x, torch.Tensor)
     assert isinstance(y, torch.Tensor)
 
-    if device is None:
-        device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
-
     x = x.to(device=device, dtype=dtype, non_blocking=non_blocking)
     y = y.to(device=device, dtype=dtype, non_blocking=non_blocking)
     return x, y

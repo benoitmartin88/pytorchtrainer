@@ -36,13 +36,9 @@ class State(object):
 
 class ModuleTrainer(object):
     def __init__(self, model: nn.Module, optimizer: optim.Optimizer, train_function,
-                 stop_condition=NoStopping(),
                  init_callback=None):
         if not callable(train_function):
             raise TypeError("Argument compute_function should be a function.")
-
-        if not callable(stop_condition):
-            raise TypeError("Argument stop_condition should be a function.")
 
         signal.signal(signal.SIGINT, self.__graceful_exit)
 
@@ -50,7 +46,6 @@ class ModuleTrainer(object):
         self.model = model
         self.optimizer = optimizer
         self.train_function = train_function
-        self.stop_condition = stop_condition
 
         self.__post_iteration_callback = []
         self.__post_epoch_callback = []
@@ -63,11 +58,14 @@ class ModuleTrainer(object):
 
             init_callback(self)
 
-    def train(self, train_dataset_loader, max_epochs=100, verbose=1):
+    def train(self, train_dataset_loader, max_epochs=100, stop_condition=NoStopping(), verbose=1):
+        if not callable(stop_condition):
+            raise TypeError("Argument stop_condition should be a function.")
+
         self.model.train()  # set the module to training mode
 
         train_start = time()
-        while self.state.current_epoch < max_epochs and not self.stop_condition(self.state):
+        while self.state.current_epoch < max_epochs and not stop_condition(self.state):
             self.model.zero_grad()
 
             for self.state.current_iteration, batch in enumerate(train_dataset_loader):
@@ -136,7 +134,6 @@ class ModuleTrainer(object):
 
 def create_default_trainer(model: nn.Module, optimizer: optim.Optimizer, criterion,
                            device=None, dtype=None, non_blocking=False,
-                           stop_condition=NoStopping(),
                            prepare_batch=batch_to_tensor,
                            output_transform=lambda x, y, y_pred, loss: (x, y, y_pred, loss.item()),
                            init_callback=None):
@@ -167,5 +164,4 @@ def create_default_trainer(model: nn.Module, optimizer: optim.Optimizer, criteri
 
     return ModuleTrainer(model, optimizer,
                          train_function=_default_train_function,
-                         stop_condition=stop_condition,
                          init_callback=init_callback)

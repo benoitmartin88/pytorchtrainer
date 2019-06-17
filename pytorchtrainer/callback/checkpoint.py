@@ -3,8 +3,7 @@ import torch.nn as nn
 import torch.optim as optim
 import os
 
-from . import Callback
-from .. import State
+from .callback import Callback
 
 default_save_diretory = './checkpoint'
 default_filename = 'checkpoint.pt.tar'
@@ -39,6 +38,7 @@ class SaveCheckpointCallback(Callback):
 
 class LoadCheckpointCallback(Callback):
     def __init__(self, save_directory=default_save_diretory, filename=default_filename, callback=None):
+        super().__init__()
         self.save_directory = save_directory
         self.filename = filename
         self.callback = callback
@@ -50,7 +50,7 @@ class LoadCheckpointCallback(Callback):
                 raise TypeError("Argument callback should be a function.")
             self.callback(trainer)
 
-    def _load_checkpoint(self, model: nn.Module, optimizer: optim.Optimizer, state: State):
+    def _load_checkpoint(self, model: nn.Module, optimizer: optim.Optimizer, state):
         # from .. import __version__
 
         checkpoint = torch.load(os.path.join(self.save_directory, self.filename))
@@ -93,7 +93,7 @@ class SaveBestCheckpointCallback(SaveCheckpointCallback):
             self._save_checkpoint(trainer.model, trainer.optimizer, trainer.state)
             self.filename = old_filename
 
-    def _get_filename(self, state: State):
+    def _get_filename(self, state):
         c = self.filename.count('.')
         base, *ext = self.filename.rsplit('.', c)
         return base + "_%d_%.2f_%d." % (state.current_epoch, state.last_train_loss, 1) + '.'.join(ext)

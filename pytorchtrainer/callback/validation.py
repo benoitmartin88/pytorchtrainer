@@ -1,5 +1,5 @@
 import torch
-from . import Callback
+from .callback import Callback
 from ..utils import batch_to_tensor
 
 
@@ -14,10 +14,6 @@ class ValidationCallback(Callback):
         self.non_blocking = non_blocking
 
     def __call__(self, trainer):
-        if not hasattr(trainer.state, self.state_attribute_name):
-            # TODO: can this be done better ? Does it have to be done every time __call__ is called ?
-            self.add_state_attribute(trainer, self.state_attribute_name, float('inf'))
-
         setattr(trainer.state, self.state_attribute_name, self._validation_function(trainer.model))
 
     def _validation_function(self, model):

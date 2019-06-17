@@ -6,6 +6,7 @@ import signal
 import torch.nn as nn
 import torch.optim as optim
 
+from .callback import Callback
 from .stop_condition import NoStopping
 from .utils import print_progress, batch_to_tensor
 
@@ -26,7 +27,8 @@ class State(object):
             setattr(self, k, v)
 
     def add_attribute(self, attribute_name: str, value):
-        setattr(self, attribute_name, value)
+        if not hasattr(self, attribute_name):
+            setattr(self, attribute_name, value)
 
     def get(self, attribute_name: str):
         return getattr(self, attribute_name)
@@ -52,6 +54,8 @@ class ModuleTrainer(object):
 
         self.__post_iteration_callback = []
         self.__post_epoch_callback = []
+
+        self.extra_progressbar_metrics = ()
 
         if init_callback is not None:
             if not callable(init_callback):
@@ -84,20 +88,17 @@ class ModuleTrainer(object):
 
         print("train time %.2f" % (time() - train_start))
 
-    def register_post_iteration_callback(self, callback):
-        from .callback import Callback
+    def add_progressbar_metric(self, format: str, metric_state_names: list):
+        if not isinstance(format, str) or not isinstance(metric_state_names, list):
+            raise TypeError("format should be string (eg: '%.2f') and metric_state_names should be a list of metric names (eg: 'accuracy')")
+        self.extra_progressbar_metrics = (format, metric_state_names)
 
-        if not issubclass(callback.__class__, Callback):
-            raise TypeError("Argument callback should inherit from Callback.")
-
+    def register_post_iteration_callback(self, callback: Callback):
+        callback.set_trainer(self)  # This is done here to simplify the API by hiding this from the user
         self.__post_iteration_callback.append(callback)
 
-    def register_post_epoch_callback(self, callback):
-        from .callback import Callback
-
-        if not issubclass(callback.__class__, Callback):
-            raise TypeError("Argument callback should inherit from Callback.")
-
+    def register_post_epoch_callback(self, callback: Callback):
+        callback.set_trainer(self)    # This is done here to simplify the API by hiding this from the user
         self.__post_epoch_callback.append(callback)
 
     def __graceful_exit(self, signum, frame):
@@ -116,15 +117,21 @@ class ModuleTrainer(object):
 
     def __update_progress_bar(self, iteration_elapsed_time, train_dataset_loader_size, max_epochs):
         remaining_time_estimation = int(iteration_elapsed_time * (train_dataset_loader_size - self.state.current_iteration))
+
+        if len(self.extra_progressbar_metrics) > 0:
+            suffix = ("%d/%d | %.2f s/it | %s remaining | train loss %.4f | " + self.extra_progressbar_metrics[0]) % \
+                     (self.state.current_iteration + 1, train_dataset_loader_size, iteration_elapsed_time,
+                      str(datetime.timedelta(seconds=remaining_time_estimation)), self.state.last_train_loss,
+                      *[getattr(self.state, a) for a in self.extra_progressbar_metrics[1]])
+        else:
+            suffix = "%d/%d | %.2f s/it | %s remaining | train loss %.4f" % \
+                     (self.state.current_iteration + 1, train_dataset_loader_size, iteration_elapsed_time,
+                      str(datetime.timedelta(seconds=remaining_time_estimation)), self.state.last_train_loss)
+
         print_progress(self.state.current_iteration + 1, train_dataset_loader_size,
                        bar_length=25,
                        prefix="epoch %d/%d" % (self.state.current_epoch + 1, max_epochs),
-                       suffix="%d/%d | %.2f s/it | %s remaining | loss (t/v) %.4f/%.4f " %
-                              (self.state.current_iteration + 1, train_dataset_loader_size, iteration_elapsed_time,
-                               str(datetime.timedelta(seconds=remaining_time_estimation)),
-                               self.state.last_train_loss,
-                               self.state.last_validation_loss if hasattr(self.state, "last_validation_loss") else float('inf')
-                               ))
+                       suffix=suffix)
 
 
 def create_default_trainer(model: nn.Module, optimizer: optim.Optimizer, criterion,

@@ -5,8 +5,8 @@ import torch
 from torch.utils.data import DataLoader
 
 from pytorchtrainer import create_default_trainer, ModuleTrainer
-from pytorchtrainer.callback import checkpoint, file_writer, MetricCallback
-from pytorchtrainer.metric import Accuracy
+from pytorchtrainer.callback import checkpoint, file_writer, MetricCallback, ValidationCallback
+from pytorchtrainer.metric import Accuracy, Loss
 
 from test.common import XorModule, XorDataset
 
@@ -52,7 +52,7 @@ class TestTrainer(unittest.TestCase):
                 x, y = batch[0], batch[1]
                 y_pred = model(x)
                 print("x=%s, y=%s" % (x, y_pred.item()))
-                self.assertEqual(self.prediction_transform(y_pred.item()), int(y.item()))
+                self.assertEqual(self.prediction_transform(y_pred), int(y.item()))
 
     def test_xor(self):
         trainer = create_default_trainer(self.model, self.optimizer, self.criterion)
@@ -112,3 +112,17 @@ class TestTrainer(unittest.TestCase):
 
         self.assertTrue(os.path.exists(writer.log_file_path))
 
+    def test_progressbar_extra_metric(self):
+        trainer = create_default_trainer(self.model, self.optimizer, self.criterion)
+
+        # Validation callback
+        trainer.register_post_epoch_callback(ValidationCallback(self.train_loader, metric=Loss(self.criterion), validate_every=1))
+
+        # Accuracy
+        trainer.register_post_iteration_callback(MetricCallback(
+            metric=Accuracy(prediction_transform=self.prediction_transform),
+            frequency=1))
+
+        trainer.add_progressbar_metric("validation loss %.4f | accuracy %.2f", ["last_validation_loss", "accuracy"])
+
+        trainer.train(self.train_loader, max_epochs=10, verbose=1)

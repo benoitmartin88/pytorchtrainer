@@ -63,6 +63,7 @@ Feel free to submit an issue or pull request. But before you do please read the 
 
 The following features will be implemented soon:
 
+- [ ] documentation !
 - [ ] `SaveBestCheckpointCallback`: take into account `saves_to_keep`
 - [ ] PyPi package
 - [ ] conda environment file

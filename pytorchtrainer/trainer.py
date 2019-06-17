@@ -3,6 +3,7 @@ import datetime
 from time import time
 import signal
 
+import torch
 import torch.nn as nn
 import torch.optim as optim
 
@@ -35,8 +36,17 @@ class State(object):
 
 
 class ModuleTrainer(object):
+    """
+    Runs a training configurable training loop over a model.
+    """
     def __init__(self, model: nn.Module, optimizer: optim.Optimizer, train_function,
                  init_callback=None):
+        """
+        :param model: PyTorch model (nn.Module) that is to be trained.
+        :param optimizer: PyTorch optimizer (optim.Optimizer) that will be used.
+        :param train_function: The main training function that will be run within the epoch and iteration loops.
+        :param init_callback: A function that will be run at the end of the trainer's constructor. Can be used to load/resume a previously trained model.
+        """
         if not callable(train_function):
             raise TypeError("Argument compute_function should be a function.")
 
@@ -58,7 +68,15 @@ class ModuleTrainer(object):
 
             init_callback(self)
 
-    def train(self, train_dataset_loader, max_epochs=100, stop_condition=NoStopping(), verbose=1):
+    def train(self, train_dataset_loader: torch.utils.data.Dataset, max_epochs=100, stop_condition=NoStopping(), verbose=1):
+        """
+        Train the model using a given data-loader.
+        Training will be stopped when `max_epochs` has been reached or if `stop_condition` returns True.
+        :param train_dataset_loader: PyTorch Dataset that will be used to load training batches.
+        :param max_epochs: Maximum number of epochs to run.
+        :param stop_condition: Stop training loop based on a defined condition. By default training will not be stopped.
+        :param verbose: Currently only used to show the progressbar. By default this is set to 1.
+        """
         if not callable(stop_condition):
             raise TypeError("Argument stop_condition should be a function.")
 
@@ -92,10 +110,18 @@ class ModuleTrainer(object):
         self.extra_progressbar_metrics = (format, metric_state_names)
 
     def register_post_iteration_callback(self, callback: Callback):
+        """
+        Add a callback function that will be run after each iteration
+        :param callback: Function that will be run
+        """
         callback.set_trainer(self)  # This is done here to simplify the API by hiding this from the user
         self.__post_iteration_callback.append(callback)
 
     def register_post_epoch_callback(self, callback: Callback):
+        """
+        Add a callback function that will be run after each epoch
+        :param callback: Function that will be run
+        """
         callback.set_trainer(self)    # This is done here to simplify the API by hiding this from the user
         self.__post_epoch_callback.append(callback)
 
@@ -137,6 +163,20 @@ def create_default_trainer(model: nn.Module, optimizer: optim.Optimizer, criteri
                            prepare_batch=batch_to_tensor,
                            output_transform=lambda x, y, y_pred, loss: (x, y, y_pred, loss.item()),
                            init_callback=None):
+    """
+    Helper method that returns an instance of `ModuleTrainer`. This is helpful as it provides a default training function.
+    Note: The optimizer's state will be reset when calling the method.
+    :param model: Model to train.
+    :param optimizer: Optimizer that will be used through-out the training.
+    :param criterion: Loss function to optimize.
+    :param device: device to use. eg: 'cpu' (default) or 'cuda'.
+    :param dtype: Passed to `prepare_batch` argument to change the model's data type. eg: `torch.float32` or `torch.float64`.
+    :param non_blocking: Passed to `prepare_batch`.
+    :param prepare_batch: Function that prepares a batch. This should return a `torch.Tensor`.
+    :param output_transform: Optionally transform the `x`, `y`, `y_prediction` and `loss`.
+    :param init_callback: Passed to `ModuleTrainer`'s constructor.
+    :return: An instance of `ModuleTrainer`.
+    """
 
     if not callable(prepare_batch):
         raise TypeError("Argument prepare_batch should be a function.")

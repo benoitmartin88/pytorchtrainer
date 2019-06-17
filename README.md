@@ -51,7 +51,7 @@ trainer.train(train_loader, max_epochs=100, verbose=1)
 ## Dependencies
 
 - python > 3.5
-- pytorch 1.0.1 (install instructions from the official PyTorch website: https://pytorch.org/get-started/locally)
+- pytorch 1.0.1 (install instructions from the official [PyTorch website](https://pytorch.org/get-started/locally))
 
 
 ## Contributing

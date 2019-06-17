@@ -58,14 +58,3 @@ trainer.train(train_loader, max_epochs=100, verbose=1)
 
 Feel free to submit an issue or pull request. But before you do please read the [contributing guidelines](CONTRIBUTING.md)
 
-
-## Road map
-
-The following features will be implemented soon:
-
-- [ ] documentation !
-- [ ] `SaveBestCheckpointCallback`: take into account `saves_to_keep`
-- [ ] PyPi package
-- [ ] conda environment file
-- [ ] tox
-

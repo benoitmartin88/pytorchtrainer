@@ -28,7 +28,7 @@ class TestTrainer(unittest.TestCase):
                                        num_workers=1
                                        )
 
-        self.prediction_transform = lambda x: int(round(x.item()))
+        self.prediction_transform = lambda x: x.round()
 
     def tearDown(self):
         super().tearDown()

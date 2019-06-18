@@ -25,5 +25,5 @@ class Accuracy(Metric):
         return self._total_correct / self._total
 
     def reset(self):
-        self._total_correct = 0.
+        self._total_correct = 0
         self._total = 0

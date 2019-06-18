@@ -1,3 +1,9 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""
+This is a simple MNIST example.
+"""
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F

@@ -16,14 +16,19 @@ You will also benefit from the following features:
 
 ## Example
 
+Code examples can be found in the [example folder](https://github.com/benoitmartin88/pytorch-trainer/tree/master/examples).
+
+Here is a simple example:
+
 ``` python
 
+import torch
 import pytorchtrainer as ptt
 
 
 # Your usual model, optimizer, loss function and data loaders
 model = MyModel()
-optimizer = torch.optim.Adam(self.model.parameters(), lr=1e-2)
+optimizer = torch.optim.Adam(self.model.parameters(), lr=1e-3)
 criterion = torch.nn.MSELoss()
 train_loader = MyTrainDataloader()
 validation_loader = MyValidationDataloader()
@@ -44,7 +49,7 @@ trainer.register_post_iteration_callback(ptt.callback.CsvWriter(save_every=1,
                                                                 extra_header=[validation_callback.state_attribute_name],
                                                                 callback=lambda state: [state.get(validation_callback.state_attribute_name)]))
 # run the training
-trainer.train(train_loader, max_epochs=100, verbose=1)
+trainer.train(train_loader, max_epochs=100)
 
 ```
 

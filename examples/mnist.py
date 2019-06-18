@@ -48,7 +48,7 @@ if __name__ == '__main__':
         ])),
         batch_size=batch_size, shuffle=True)
 
-    trainer = ptt.create_default_trainer(model, optimizer, criterion)
+    trainer = ptt.create_default_trainer(model, optimizer, criterion, verbose=1)
 
     # Validate after every 200 iteration and after every epoch
     trainer.register_post_iteration_callback(ptt.callback.ValidationCallback(validation_loader, metric=ptt.metric.Loss(criterion), validate_every=200))
@@ -65,4 +65,4 @@ if __name__ == '__main__':
     # add validation loss and accuracy in progress bar
     trainer.add_progressbar_metric("validation loss %.4f | accuracy %.2f", [validation.state_attribute_name, accuracy.state_attribute_name])
 
-    trainer.train(train_loader, max_epochs=10, verbose=1)
+    trainer.train(train_loader, max_epochs=10)

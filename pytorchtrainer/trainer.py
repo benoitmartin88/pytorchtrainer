@@ -40,12 +40,13 @@ class ModuleTrainer(object):
     Runs a training configurable training loop over a model.
     """
     def __init__(self, model: nn.Module, optimizer: optim.Optimizer, train_function,
-                 init_callback=None):
+                 init_callback=None, verbose=1):
         """
         :param model: PyTorch model (nn.Module) that is to be trained.
         :param optimizer: PyTorch optimizer (optim.Optimizer) that will be used.
         :param train_function: The main training function that will be run within the epoch and iteration loops.
         :param init_callback: A function that will be run at the end of the trainer's constructor. Can be used to load/resume a previously trained model.
+        :param verbose: Currently only used to show the progressbar. By default this is set to 1.
         """
         if not callable(train_function):
             raise TypeError("Argument compute_function should be a function.")
@@ -68,14 +69,17 @@ class ModuleTrainer(object):
 
             init_callback(self)
 
-    def train(self, train_dataset_loader: torch.utils.data.Dataset, max_epochs=100, stop_condition=NoStopping(), verbose=1):
+        self.verbose = verbose
+        if self.verbose == 1:
+            print(model)
+
+    def train(self, train_dataset_loader: torch.utils.data.Dataset, max_epochs=100, stop_condition=NoStopping()):
         """
         Train the model using a given data-loader.
         Training will be stopped when `max_epochs` has been reached or if `stop_condition` returns True.
         :param train_dataset_loader: PyTorch Dataset that will be used to load training batches.
         :param max_epochs: Maximum number of epochs to run.
         :param stop_condition: Stop training loop based on a defined condition. By default training will not be stopped.
-        :param verbose: Currently only used to show the progressbar. By default this is set to 1.
         """
         if not callable(stop_condition):
             raise TypeError("Argument stop_condition should be a function.")
@@ -96,7 +100,7 @@ class ModuleTrainer(object):
 
                 iteration_elapsed_time = time() - iteration_start
 
-                if verbose == 1:
+                if self.verbose == 1:
                     self.__update_progress_bar(iteration_elapsed_time, len(train_dataset_loader), max_epochs)
 
             self.state.current_epoch += 1
@@ -162,7 +166,8 @@ def create_default_trainer(model: nn.Module, optimizer: optim.Optimizer, criteri
                            device=None, dtype=None, non_blocking=False,
                            prepare_batch=batch_to_tensor,
                            output_transform=lambda x, y, y_pred, loss: (x, y, y_pred, loss.item()),
-                           init_callback=None):
+                           init_callback=None,
+                           verbose=1):
     """
     Helper method that returns an instance of `ModuleTrainer`. This is helpful as it provides a default training function.
     Note: The optimizer's state will be reset when calling the method.
@@ -175,6 +180,7 @@ def create_default_trainer(model: nn.Module, optimizer: optim.Optimizer, criteri
     :param prepare_batch: Function that prepares a batch. This should return a `torch.Tensor`.
     :param output_transform: Optionally transform the `x`, `y`, `y_prediction` and `loss`.
     :param init_callback: Passed to `ModuleTrainer`'s constructor.
+    :param verbose: Currently only used to show the progressbar. By default this is set to 1.
     :return: An instance of `ModuleTrainer`.
     """
 
@@ -207,4 +213,5 @@ def create_default_trainer(model: nn.Module, optimizer: optim.Optimizer, criteri
 
     return ModuleTrainer(model, optimizer,
                          train_function=_default_train_function,
-                         init_callback=init_callback)
+                         init_callback=init_callback,
+                         verbose=verbose)

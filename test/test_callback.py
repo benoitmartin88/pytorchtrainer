@@ -71,7 +71,7 @@ class TestCallback(unittest.TestCase):
                                                                        extra_header=[validation_callback.state_attribute_name],
                                                                        callback=lambda state: [state.get(validation_callback.state_attribute_name)]))
         trainer.register_post_epoch_callback(validation_callback)
-        trainer.train(self.train_loader, max_epochs=5, verbose=1)
+        trainer.train(self.train_loader, max_epochs=5)
 
         self.assertTrue(validation_callback.has_been_called)
         self.assertTrue(trainer.state.last_validation_loss != float('inf'))
@@ -83,7 +83,7 @@ class TestCallback(unittest.TestCase):
         trainer = create_default_trainer(self.model, self.optimizer, self.criterion)
         trainer.register_post_epoch_callback(validation_callback)
         trainer.register_post_epoch_callback(callback)
-        trainer.train(self.train_loader, max_epochs=10, verbose=1)
+        trainer.train(self.train_loader, max_epochs=10)
 
         self.assertTrue(callback.has_been_called)
 

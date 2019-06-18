@@ -56,27 +56,27 @@ class TestTrainer(unittest.TestCase):
 
     def test_xor(self):
         trainer = create_default_trainer(self.model, self.optimizer, self.criterion)
-        trainer.train(self.train_loader, max_epochs=100, verbose=1)
+        trainer.train(self.train_loader, max_epochs=100)
 
         self._evaluate_model(self.model, self.train_loader)
 
     def test_dtype(self):
         for dtype in [torch.float32, torch.float64]:
             trainer = create_default_trainer(self.model, self.optimizer, self.criterion, dtype=dtype)
-            trainer.train(self.train_loader, max_epochs=5, verbose=1)
+            trainer.train(self.train_loader, max_epochs=5)
             del trainer
 
     def test_checkpoint_save(self):
         trainer = create_default_trainer(self.model, self.optimizer, self.criterion)
         trainer.register_post_epoch_callback(checkpoint.SaveCheckpointCallback(save_every=1))
-        trainer.train(self.train_loader, max_epochs=1, verbose=1)
+        trainer.train(self.train_loader, max_epochs=1)
 
         self.assertTrue(os.path.exists(os.path.join(checkpoint.default_save_diretory, checkpoint.default_filename)))
 
     def test_checkpoint_load(self):
         trainer = create_default_trainer(self.model, self.optimizer, self.criterion)
         trainer.register_post_epoch_callback(checkpoint.SaveCheckpointCallback(save_every=1))
-        trainer.train(self.train_loader, max_epochs=1, verbose=1)
+        trainer.train(self.train_loader, max_epochs=1)
 
         self.assertTrue(os.path.exists(os.path.join(checkpoint.default_save_diretory, checkpoint.default_filename)))
 
@@ -99,7 +99,7 @@ class TestTrainer(unittest.TestCase):
 
         self.assertTrue(has_callback_been_called)
 
-        trainer.train(self.train_loader, max_epochs=2, verbose=1)
+        trainer.train(self.train_loader, max_epochs=2)
 
         self.assertEqual(2, trainer.state.current_epoch)
 
@@ -108,7 +108,7 @@ class TestTrainer(unittest.TestCase):
 
         trainer = create_default_trainer(self.model, self.optimizer, self.criterion)
         trainer.register_post_epoch_callback(writer)
-        trainer.train(self.train_loader, max_epochs=10, verbose=1)
+        trainer.train(self.train_loader, max_epochs=10)
 
         self.assertTrue(os.path.exists(writer.log_file_path))
 
@@ -125,4 +125,4 @@ class TestTrainer(unittest.TestCase):
 
         trainer.add_progressbar_metric("validation loss %.4f | accuracy %.2f", ["last_validation_loss", "accuracy"])
 
-        trainer.train(self.train_loader, max_epochs=10, verbose=1)
+        trainer.train(self.train_loader, max_epochs=10)

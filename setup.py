@@ -20,7 +20,7 @@ setup(name="pytorchtrainer",
                 'pytorchtrainer.metric',
                 'pytorchtrainer.stop_condition'],
 
-      install_requires=["pytorch >= 0.4.1"],
+      install_requires=["torch >= 0.4.1"],
 
       # tests_require=["unittest"],
       test_suite='test',

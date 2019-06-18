@@ -131,12 +131,12 @@ class ModuleTrainer(object):
 
     def __run_post_iteration_callbacks(self):
         for cb in self.__post_iteration_callback:
-            if self.state.current_iteration % cb.frequency == 0:
+            if cb.frequency != 0 and self.state.current_iteration != 0 and self.state.current_iteration % cb.frequency == 0:
                 cb(self)
 
     def __run_post_epoch_callbacks(self):
         for cb in self.__post_epoch_callback:
-            if cb.frequency != 0 and self.state.current_epoch % cb.frequency == 0:
+            if cb.frequency != 0 and self.state.current_epoch != 0 and self.state.current_epoch % cb.frequency == 0:
                 cb(self)
 
     def __update_progress_bar(self, iteration_elapsed_time, train_dataset_loader_size, max_epochs):

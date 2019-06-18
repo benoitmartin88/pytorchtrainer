@@ -13,7 +13,7 @@ from .utils import print_progress, batch_to_tensor
 
 
 class State(object):
-    current_epoch = 1
+    current_epoch = 0
     current_iteration = 1
     last_x = None
     last_y = None
@@ -87,7 +87,7 @@ class ModuleTrainer(object):
         self.model.train()  # set the module to training mode
 
         train_start = time()
-        while self.state.current_epoch <= max_epochs and not stop_condition(self.state):
+        while self.state.current_epoch < max_epochs and not stop_condition(self.state):
             self.model.zero_grad()
 
             for self.state.current_iteration, batch in enumerate(train_dataset_loader):
@@ -159,7 +159,7 @@ class ModuleTrainer(object):
 
         print_progress(self.state.current_iteration, train_dataset_loader_size,
                        bar_length=25,
-                       prefix="epoch %d/%d" % (self.state.current_epoch, max_epochs),
+                       prefix="epoch %d/%d" % (self.state.current_epoch + 1, max_epochs),
                        suffix=suffix)
 
 
@@ -193,8 +193,7 @@ def create_default_trainer(model: nn.Module, optimizer: optim.Optimizer, criteri
     if device is None:
         device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 
-    if device:
-        model.to(device)
+    model.to(device)
 
     if dtype:
         model.to(dtype=dtype)

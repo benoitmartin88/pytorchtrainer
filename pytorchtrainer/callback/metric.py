@@ -2,8 +2,8 @@ from .callback import Callback
 
 
 class MetricCallback(Callback):
-    def __init__(self, metric, frequency=10):
-        super().__init__(frequency=frequency, state_attribute_name=metric.name)
+    def __init__(self, metric, frequency=1):
+        super().__init__(frequency=frequency, state_attribute_name=metric.name, state_attribute_default_value=metric.default_value)
         self.metric = metric
         self.last_epoch = 0
 

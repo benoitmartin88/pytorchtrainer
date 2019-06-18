@@ -1,8 +1,11 @@
 
+default_float_rounding = 8
+
+
 class EarlyStopping(object):
     def __init__(self, patience=10,
                  metric=lambda state: state.last_train_loss,
-                 comparison_function=lambda metric, best: metric >= best):
+                 comparison_function=lambda metric, best: round(metric, default_float_rounding) >= round(best, default_float_rounding)):
         if patience < 1:
             raise ValueError("Argument patience should be positive integer.")
 

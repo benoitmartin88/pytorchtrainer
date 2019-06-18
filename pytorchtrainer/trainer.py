@@ -209,7 +209,7 @@ def create_default_trainer(model: nn.Module, optimizer: optim.Optimizer, criteri
         loss = criterion(y_pred, y)
         loss.backward()
         optimizer.step()
-        return output_transform(x, y, y_pred, loss)
+        return output_transform(x, y, y_pred.detach(), loss.detach())
 
     return ModuleTrainer(model, optimizer,
                          train_function=_default_train_function,

@@ -5,7 +5,7 @@ from . import Metric
 
 class Accuracy(Metric):
     def __init__(self, prediction_transform=lambda x: x):
-        super().__init__("accuracy")
+        super().__init__("accuracy", default_value=0)
         self._total_correct = 0
         self._total = 0
         self.prediction_transform = prediction_transform

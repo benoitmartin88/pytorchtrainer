@@ -5,7 +5,7 @@ from . import Metric
 
 class MeanAbsoluteError(Metric):
     def __init__(self):
-        super().__init__("mae")
+        super().__init__("mae", default_value=float('inf'))
         self._absolute_error_sum = 0.
         self._total = 0
 

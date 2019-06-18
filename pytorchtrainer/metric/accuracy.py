@@ -11,7 +11,10 @@ class Accuracy(Metric):
         self.prediction_transform = prediction_transform
 
     def step(self, y: torch.Tensor, y_pred: torch.Tensor):
-        correct = torch.eq(y, self.prediction_transform(y_pred))
+        y_pred = self.prediction_transform(y_pred)
+        if y.size() != y_pred.size():
+            raise TypeError("y and y_pred should have the same shape")
+        correct = torch.eq(y, y_pred)
 
         self._total_correct += torch.sum(correct).item()
         self._total += correct.size(dim=0)    # dim 0 should be batch size

@@ -73,11 +73,11 @@ class ModuleTrainer(object):
         if self.verbose == 1:
             print(model)
 
-    def train(self, train_dataset_loader: torch.utils.data.Dataset, max_epochs=100, stop_condition=NoStopping()):
+    def train(self, train_dataset_loader: torch.utils.data.DataLoader, max_epochs=100, stop_condition=NoStopping()):
         """
         Train the model using a given data-loader.
         Training will be stopped when `max_epochs` has been reached or if `stop_condition` returns True.
-        :param train_dataset_loader: PyTorch Dataset that will be used to load training batches.
+        :param train_dataset_loader: PyTorch DataLoader that will be used to load training batches.
         :param max_epochs: Maximum number of epochs to run.
         :param stop_condition: Stop training loop based on a defined condition. By default training will not be stopped.
         """

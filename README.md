@@ -1,5 +1,7 @@
 # PyTorch trainer
 
+[![CircleCI](https://circleci.com/gh/benoitmartin88/pytorch-trainer/tree/master.svg?style=svg)](https://circleci.com/gh/benoitmartin88/pytorch-trainer/tree/master)
+
 Are you tired of writing those same epoch and data-loader loops to train your PyTorch module ?
 Look no further, PyTorch trainer is a library that hides all those boring training lines of code that should be native to PyTorch. 
 

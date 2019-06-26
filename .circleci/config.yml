@@ -41,7 +41,7 @@ jobs:
             . venv/bin/activate
             python -m unittest
 
-      - build:
+      - run:
           name: build package
           branches:
             only:
@@ -51,7 +51,7 @@ jobs:
             . venv/bin/activate
             python setup.py sdist bdist_wheel
 
-      - deploy-rc:
+      - run:
           name: deploy release candidate
           branches:
             only:
@@ -60,7 +60,7 @@ jobs:
             . venv/bin/activate
             twine upload --repository testpypi dist/*
 
-      - deploy-release:
+      - run:
           name: deploy release
           branches:
             only:

@@ -43,6 +43,10 @@ jobs:
 
       - build:
           name: build package
+          branches:
+            only:
+              - rc
+              - master
           command: |
             . venv/bin/activate
             python setup.py sdist bdist_wheel

@@ -27,6 +27,7 @@ jobs:
             python3 -m venv venv
             . venv/bin/activate
             pip install -q -r requirements.txt
+            pip install -q twine
 
       - save_cache:
           paths:
@@ -39,6 +40,30 @@ jobs:
           command: |
             . venv/bin/activate
             python -m unittest
+
+      - build:
+          name: build package
+          command: |
+            . venv/bin/activate
+            python setup.py sdist bdist_wheel
+
+      - deploy-rc:
+          name: deploy release candidate
+          branches:
+            only:
+              - rc
+          command: |
+            . venv/bin/activate
+            twine upload --repository testpypi dist/*
+
+      - deploy-release:
+          name: deploy release
+          branches:
+            only:
+              - master
+          command: |
+            . venv/bin/activate
+            twine upload --repository pypi dist/*
 
 #      - store_artifacts:
 #          path: test-reports

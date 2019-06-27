@@ -18,7 +18,7 @@ references:
         - pip-packages-v1-
 
 jobs:
-  prepare:
+  prepare_env:
     docker:
       # specify the version you desire here
       - image: circleci/python:3.5
@@ -52,10 +52,6 @@ jobs:
             python -m unittest
 
   build:
-    branches:
-      only:
-        - rc
-        - master
     steps:
       - checkout
       - *attach_workspace
@@ -71,9 +67,6 @@ jobs:
             - dist/
 
   deploy_rc:
-    branches:
-      only:
-        - rc
     steps:
       - *attach_workspace
       - *restore_cache
@@ -84,9 +77,6 @@ jobs:
             twine upload --repository testpypi dist/*
 
   deploy:
-    branches:
-      only:
-        - master
     steps:
       - *attach_workspace
       - *restore_cache
@@ -99,3 +89,32 @@ jobs:
 #      - store_artifacts:
 #          path: test-reports
 #          destination: test-reports
+
+workflows:
+  version: 2
+  build-deploy:
+    jobs:
+      - prepare_env
+      - test:
+          requires:
+            - prepare_env
+      - build:
+          requires:
+            - test
+          filters:
+            branches:
+              only:
+                - rc
+                - master
+      - deploy_rc:
+          requires:
+            - build
+          filters:
+            branches:
+              only: rc
+      - deploy:
+          requires:
+            - build
+          filters:
+            branches:
+              only: master

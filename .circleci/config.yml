@@ -20,7 +20,6 @@ references:
 jobs:
   prepare_env:
     docker:
-      # specify the version you desire here
       - image: circleci/python:3.5
 
     working_directory: ~/repo
@@ -42,6 +41,9 @@ jobs:
           key: pip-packages-v1-{{ .Branch }}-{{ checksum "requirements.txt" }}
 
   test:
+    docker:
+      - image: circleci/python:3.5
+
     steps:
       - checkout
       - *restore_cache
@@ -52,6 +54,9 @@ jobs:
             python -m unittest
 
   build:
+    docker:
+      - image: circleci/python:3.5
+
     steps:
       - checkout
       - *attach_workspace
@@ -67,6 +72,9 @@ jobs:
             - dist/
 
   deploy_rc:
+    docker:
+      - image: circleci/python:3.5
+
     steps:
       - *attach_workspace
       - *restore_cache
@@ -77,6 +85,9 @@ jobs:
             twine upload --repository testpypi dist/*
 
   deploy:
+    docker:
+      - image: circleci/python:3.5
+
     steps:
       - *attach_workspace
       - *restore_cache

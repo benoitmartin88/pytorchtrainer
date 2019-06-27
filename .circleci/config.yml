@@ -50,6 +50,7 @@ jobs:
       - run:
           name: run tests
           command: |
+            python3 -m venv venv
             . venv/bin/activate
             python -m unittest
 
@@ -64,6 +65,7 @@ jobs:
       - run:
           name: build package
           command: |
+            python3 -m venv venv
             . venv/bin/activate
             python setup.py sdist bdist_wheel
       - persist_to_workspace:
@@ -81,6 +83,7 @@ jobs:
       - run:
           name: deploy release candidate
           command: |
+            python3 -m venv venv
             . venv/bin/activate
             twine upload --repository testpypi dist/*
 
@@ -94,6 +97,7 @@ jobs:
       - run:
           name: deploy release
           command: |
+            python3 -m venv venv
             . venv/bin/activate
             twine upload --repository pypi dist/*
 

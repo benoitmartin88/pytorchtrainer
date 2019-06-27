@@ -37,7 +37,8 @@ jobs:
 
       - save_cache:
           paths:
-            - ./venv
+            - ~/.local
+            - ~/.cache
           key: pip-packages-v1-{{ .Branch }}-{{ checksum "requirements.txt" }}
 
   test:

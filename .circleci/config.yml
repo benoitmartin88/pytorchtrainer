@@ -3,8 +3,22 @@
 # Check https://circleci.com/docs/2.0/language-python/ for more details
 #
 version: 2
+
+references:
+  workspace_root: &workspace_root
+    /tmp/workspace
+  attach_workspace: &attach_workspace
+    attach_workspace:
+      at: *workspace_root
+  restore_cache: &restore_cache
+    restore_cache:
+      keys:
+        - pip-packages-v1-{{ .Branch }}-{{ checksum "requirements.txt" }}
+        - pip-packages-v1-{{ .Branch }}-
+        - pip-packages-v1-
+
 jobs:
-  build:
+  prepare:
     docker:
       # specify the version you desire here
       - image: circleci/python:3.5
@@ -13,14 +27,7 @@ jobs:
 
     steps:
       - checkout
-
-      - restore_cache:
-          keys:
-            # when lock file changes, use increasingly general patterns to restore cache
-            - pip-packages-v1-{{ .Branch }}-{{ checksum "requirements.txt" }}
-            - pip-packages-v1-{{ .Branch }}-
-            - pip-packages-v1-
-
+      - *restore_cache
       - run:
           name: install dependencies
           command: |
@@ -34,37 +41,57 @@ jobs:
             - ./venv
           key: pip-packages-v1-{{ .Branch }}-{{ checksum "requirements.txt" }}
 
-      # run tests!
+  test:
+    steps:
+      - checkout
+      - *restore_cache
       - run:
           name: run tests
           command: |
             . venv/bin/activate
             python -m unittest
 
+  build:
+    branches:
+      only:
+        - rc
+        - master
+    steps:
+      - checkout
+      - *attach_workspace
+      - *restore_cache
       - run:
           name: build package
-          branches:
-            only:
-              - rc
-              - master
           command: |
             . venv/bin/activate
             python setup.py sdist bdist_wheel
+      - persist_to_workspace:
+          root: *workspace_root
+          paths:
+            - dist/
 
+  deploy_rc:
+    branches:
+      only:
+        - rc
+    steps:
+      - *attach_workspace
+      - *restore_cache
       - run:
           name: deploy release candidate
-          branches:
-            only:
-              - rc
           command: |
             . venv/bin/activate
             twine upload --repository testpypi dist/*
 
+  deploy:
+    branches:
+      only:
+        - master
+    steps:
+      - *attach_workspace
+      - *restore_cache
       - run:
           name: deploy release
-          branches:
-            only:
-              - master
           command: |
             . venv/bin/activate
             twine upload --repository pypi dist/*

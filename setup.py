@@ -17,7 +17,6 @@ def find_version(*file_paths):
 
 
 def readme():
-    """print long description"""
     with open('README.md') as f:
         return f.read()
 
@@ -30,6 +29,7 @@ setup(name="pytorchtrainer",
 
       description='PyTorch module trainer',
       long_description=readme(),
+      long_description_content_type='text/markdown',
       license='MIT',
 
       url='https://github.com/benoitmartin88/pytorchtrainer',

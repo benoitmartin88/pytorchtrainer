@@ -6,14 +6,14 @@ version: 2
 
 references:
   workspace_root: &workspace_root
-    /tmp/workspace
+    ~/repo
   attach_workspace: &attach_workspace
     attach_workspace:
       at: *workspace_root
   restore_cache: &restore_cache
     restore_cache:
       keys:
-        - v1-pip-packages-{{ .Branch }}-{{ checksum "requirements.txt" }}
+        - v2-pip-packages-{{ .Branch }}-{{ checksum "requirements.txt" }}
 
 jobs:
   prepare_env:
@@ -39,7 +39,7 @@ jobs:
           paths:
             - venv
             - ~/.cache
-          key: v1-pip-packages-{{ .Branch }}-{{ checksum "requirements.txt" }}
+          key: v2-pip-packages-{{ .Branch }}-{{ checksum "requirements.txt" }}
 
   test:
     docker:

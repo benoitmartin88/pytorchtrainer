@@ -13,9 +13,7 @@ references:
   restore_cache: &restore_cache
     restore_cache:
       keys:
-        - pip-packages-v1-{{ .Branch }}-{{ checksum "requirements.txt" }}
-#        - pip-packages-v1-{{ .Branch }}-
-#        - pip-packages-v1-
+        - v1-pip-packages-{{ .Branch }}-{{ checksum "requirements.txt" }}
 
 jobs:
   prepare_env:
@@ -39,10 +37,9 @@ jobs:
 
       - save_cache:
           paths:
-#            - .venv
             - venv
             - ~/.cache
-          key: pip-packages-v1-{{ .Branch }}-{{ checksum "requirements.txt" }}
+          key: v1-pip-packages-{{ .Branch }}-{{ checksum "requirements.txt" }}
 
   test:
     docker:
@@ -64,6 +61,8 @@ jobs:
     docker:
       - image: circleci/python:3.5
 
+    working_directory: ~/repo
+
     steps:
       - checkout
       - *attach_workspace
@@ -83,6 +82,8 @@ jobs:
     docker:
       - image: circleci/python:3.5
 
+    working_directory: ~/repo
+
     steps:
       - *attach_workspace
       - *restore_cache
@@ -96,6 +97,8 @@ jobs:
   deploy:
     docker:
       - image: circleci/python:3.5
+
+    working_directory: ~/repo
 
     steps:
       - *attach_workspace

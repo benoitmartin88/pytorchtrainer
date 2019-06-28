@@ -14,8 +14,8 @@ references:
     restore_cache:
       keys:
         - pip-packages-v1-{{ .Branch }}-{{ checksum "requirements.txt" }}
-        - pip-packages-v1-{{ .Branch }}-
-        - pip-packages-v1-
+#        - pip-packages-v1-{{ .Branch }}-
+#        - pip-packages-v1-
 
 jobs:
   prepare_env:

@@ -1,6 +1,6 @@
 # PyTorch trainer
 
-[![CircleCI](https://circleci.com/gh/benoitmartin88/pytorch-trainer/tree/master.svg?style=svg)](https://circleci.com/gh/benoitmartin88/pytorch-trainer/tree/master)
+[![CircleCI](https://circleci.com/gh/benoitmartin88/pytorchtrainer/tree/master.svg?style=svg)](https://circleci.com/gh/benoitmartin88/pytorchtrainer/tree/master)
 
 Are you tired of writing those same epoch and data-loader loops to train your PyTorch module ?
 Look no further, PyTorch trainer is a library that hides all those boring training lines of code that should be native to PyTorch. 
@@ -18,7 +18,7 @@ You will also benefit from the following features:
 
 ## Example
 
-Code examples can be found in the [example folder](https://github.com/benoitmartin88/pytorch-trainer/tree/master/examples).
+Code examples can be found in the [example folder](https://github.com/benoitmartin88/pytorchtrainer/tree/master/examples).
 
 Here is a simple example:
 

@@ -31,7 +31,7 @@ jobs:
             python3 -m venv venv
             . venv/bin/activate
             pip install -q -r requirements.txt
-            pip install -q twine wheel
+            pip install -q -U twine wheel
             ls -alh
             ls -alh ~
 
@@ -93,7 +93,7 @@ jobs:
           command: |
             python3 -m venv venv
             . venv/bin/activate
-            twine upload --repository testpypi dist/*
+            twine upload --verbose --repository testpypi dist/*
 
   deploy:
     docker:

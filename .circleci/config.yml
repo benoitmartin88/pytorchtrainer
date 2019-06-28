@@ -85,6 +85,7 @@ jobs:
     working_directory: ~/repo
 
     steps:
+      - checkout
       - *attach_workspace
       - *restore_cache
       - run:
@@ -101,6 +102,7 @@ jobs:
     working_directory: ~/repo
 
     steps:
+      - checkout
       - *attach_workspace
       - *restore_cache
       - run:

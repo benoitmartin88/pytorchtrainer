@@ -54,7 +54,6 @@ jobs:
       - run:
           name: run tests
           command: |
-#            python3 -m venv venv
             . venv/bin/activate
             python -m unittest
 

@@ -13,14 +13,14 @@ Before sending your pull requests, make sure you followed this list.
 
 If you want to contribute, start working through the codebase,
 navigate to the
-[Github "issues" tab](https://github.com/benoitmartin88/pytorch-trainer/issues) and start
+[Github "issues" tab](https://github.com/benoitmartin88/pytorchtrainer/issues) and start
 looking through interesting issues. 
 
 
 ### Contribution guidelines and standards
 
 Before sending your pull request for
-[review](https://github.com/benoitmartin88/pytorch-trainer/pulls),
+[review](https://github.com/benoitmartin88/pytorchtrainer/pulls),
 make sure your changes are consistent with the guidelines and follow the coding style.
 
 #### General guidelines and philosophy for contribution

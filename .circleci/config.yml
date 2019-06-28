@@ -13,7 +13,7 @@ references:
   restore_cache: &restore_cache
     restore_cache:
       keys:
-        - v2-pip-packages-{{ .Branch }}-{{ checksum "requirements.txt" }}
+        - v3-pip-packages-{{ .Branch }}-{{ checksum "requirements.txt" }}
 
 jobs:
   prepare_env:
@@ -31,7 +31,7 @@ jobs:
             python3 -m venv venv
             . venv/bin/activate
             pip install -q -r requirements.txt
-            pip install -q -U twine wheel
+            pip install -q -U twine wheel setuptools
             ls -alh
             ls -alh ~
 
@@ -39,7 +39,7 @@ jobs:
           paths:
             - venv
             - ~/.cache
-          key: v2-pip-packages-{{ .Branch }}-{{ checksum "requirements.txt" }}
+          key: v3-pip-packages-{{ .Branch }}-{{ checksum "requirements.txt" }}
 
   test:
     docker:

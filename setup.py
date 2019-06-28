@@ -17,7 +17,7 @@ def find_version(*file_paths):
 
 
 def readme():
-    with open('README.md') as f:
+    with open('README.md', 'r') as f:
         return f.read()
 
 

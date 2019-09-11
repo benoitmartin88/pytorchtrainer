@@ -14,9 +14,9 @@ class ValidationCallback(Callback):
         self.non_blocking = non_blocking
 
     def __call__(self, trainer):
-        setattr(trainer.state, self.state_attribute_name, self._validation_function(trainer.model))
+        setattr(trainer.state, self.state_attribute_name, self._validation_function(trainer.model, trainer.prepare_batch_function))
 
-    def _validation_function(self, model):
+    def _validation_function(self, model, prepare_batch_function):
         model.eval()
 
         device_to_use = self.device
@@ -30,8 +30,8 @@ class ValidationCallback(Callback):
 
         with torch.no_grad():
             for batch in self.dataset_loader:
-                x, y = batch_to_tensor(batch, device=device_to_use, dtype=self.dtype, non_blocking=self.non_blocking)
-                y_pred = model(x)
+                x, y, model_args = prepare_batch_function(batch, device=device_to_use, dtype=self.dtype, non_blocking=self.non_blocking)
+                y_pred = model(x, **model_args)
                 self.metric.step(y, y_pred)
 
         model.to(models_device)    # this will be a no-op if the device has not changed

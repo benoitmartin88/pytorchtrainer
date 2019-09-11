@@ -62,6 +62,11 @@ class TestCallback(unittest.TestCase):
         shutil.rmtree(os.path.join(checkpoint.default_save_diretory), ignore_errors=True)
         shutil.rmtree(os.path.join(file_writer.default_save_directory), ignore_errors=True)
 
+    def test_frequency_error(self):
+        from pytorchtrainer.callback import Callback
+        self.assertRaises(ValueError, Callback, frequency=-1)
+        self.assertRaises(NotImplementedError, Callback(frequency=0), trainer=None)
+
     def test_validation(self):
         validation_callback = MyValidationCallback(self.train_loader, TorchLoss(self.criterion), validate_every=1)
 

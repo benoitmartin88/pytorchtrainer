@@ -21,6 +21,13 @@ class TestMetric(unittest.TestCase):
     def tearDownClass(cls):
         super().tearDownClass()
 
+    def test_errors(self):
+        from pytorchtrainer.metric import Metric
+        metric = Metric("")
+        self.assertRaises(NotImplementedError, metric.step, None, None)
+        self.assertRaises(NotImplementedError, metric.compute)
+        self.assertRaises(NotImplementedError, metric.reset)
+
     def test_accuracy(self):
         from pytorchtrainer.metric import Accuracy
         accuracy = Accuracy()

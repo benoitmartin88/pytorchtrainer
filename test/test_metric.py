@@ -76,7 +76,7 @@ class TestMetric(unittest.TestCase):
         self.assertEqual(4, mea._total)
         self.assertEqual(1.0, mea.compute())
 
-    def test_loss_l1(self):
+    def test_torchloss_l1(self):
         from pytorchtrainer.metric import TorchLoss
         import torch
         l1 = TorchLoss(torch.nn.L1Loss())
@@ -86,6 +86,7 @@ class TestMetric(unittest.TestCase):
 
         l1.reset()
         self.assertEqual(0, l1._loss_sum)
+        self.assertEqual(0, l1._total)
 
         l1.step(torch.tensor([[1.]]), torch.tensor([[2.]]))
 
@@ -98,5 +99,6 @@ class TestMetric(unittest.TestCase):
 
         l1.reset()
         l1.step(torch.tensor([[1.], [1.]]), torch.tensor([[2.], [1.]]))
+        l1.step(torch.tensor([[1.], [1.]]), torch.tensor([[2.], [2.]]))
 
-        self.assertEqual(0.5, l1.compute())
+        self.assertEqual(0.75, l1.compute())

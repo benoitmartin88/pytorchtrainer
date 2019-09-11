@@ -13,7 +13,7 @@ class CsvWriter(Callback):
                  extra_header=None, callback=None):
         super().__init__()
         file, ext = filename.rsplit('.', 1)
-        self.log_file_path = os.path.join(save_directory, file + '_' + time.strftime("%Y%M%d_%H%M%S") + '.' + ext)
+        self.log_file_path = os.path.join(save_directory, file + '_' + time.strftime("%Y%m%d_%H%M%S") + '.' + ext)
         self.delimiter = delimiter
         self.callback = callback
 

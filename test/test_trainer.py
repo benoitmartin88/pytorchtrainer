@@ -116,12 +116,22 @@ class TestTrainer(unittest.TestCase):
         trainer = create_default_trainer(self.model, self.optimizer, self.criterion)
 
         # Validation callback
-        trainer.register_post_epoch_callback(ValidationCallback(self.train_loader, metric=TorchLoss(self.criterion)))
+        validation_callback = ValidationCallback(self.train_loader, metric=TorchLoss(self.criterion))
+        trainer.register_post_epoch_callback(validation_callback)
 
         # Accuracy
-        trainer.register_post_iteration_callback(MetricCallback(
-            metric=Accuracy(prediction_transform=self.prediction_transform)))
+        accuracy_callback = MetricCallback(metric=Accuracy(prediction_transform=self.prediction_transform))
+        trainer.register_post_iteration_callback(accuracy_callback)
 
-        trainer.add_progressbar_metric("validation loss %.4f | accuracy %.2f", ["last_validation_loss", "accuracy"])
+        trainer.add_progressbar_metric("validation loss %.4f | accuracy %.2f", [validation_callback, accuracy_callback])
 
         trainer.train(self.train_loader, max_epochs=10)
+
+    def test_add_progressbar_metric_errors(self):
+        from pytorchtrainer.callback import CsvWriter
+
+        trainer = create_default_trainer(self.model, self.optimizer, self.criterion)
+
+        self.assertRaises(TypeError, trainer.add_progressbar_metric, None, [])
+        self.assertRaises(TypeError, trainer.add_progressbar_metric, "", [None])
+        self.assertRaises(RuntimeError, trainer.add_progressbar_metric, "", [CsvWriter()])

@@ -71,7 +71,7 @@ class TestStopCondition(unittest.TestCase):
 
         trainer = create_default_trainer(self.model, self.optimizer, self.criterion)
         trainer.register_post_iteration_callback(accuracy)
-        trainer.add_progressbar_metric("accuracy %.2f", [accuracy.state_attribute_name])
+        trainer.add_progressbar_metric("accuracy %.2f", [accuracy])
 
         trainer.train(self.train_loader, max_epochs=self.MAX_EPOCHS, stop_condition=early_stopping)
 

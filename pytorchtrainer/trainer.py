@@ -113,10 +113,20 @@ class ModuleTrainer(object):
 
         print("train time %.2f" % (time() - train_start))
 
-    def add_progressbar_metric(self, format: str, metric_state_names: list):
-        if not isinstance(format, str) or not isinstance(metric_state_names, list):
+    def add_progressbar_metric(self, format: str, callbacks: list):
+        if not isinstance(format, str) or not isinstance(callbacks, list):
             raise TypeError("format should be string (eg: '%.2f') and metric_state_names should be a list of metric names (eg: 'accuracy')")
-        self.extra_progressbar_metrics = (format, metric_state_names)
+
+        for callback in callbacks:
+            if not isinstance(callback, Callback):
+                raise TypeError("callbacks argument should only contain Callback instances.")
+
+            assert hasattr(callback, "state_attribute_name")
+
+            if callback.state_attribute_name is None:
+                raise RuntimeError("callback %s cannot be used. It does not store any data to the trainer's state." % callback.state_attribute_name)
+
+        self.extra_progressbar_metrics = (format, callbacks)
 
     def register_post_iteration_callback(self, callback: Callback, frequency: int = 1):
         """
@@ -163,7 +173,7 @@ class ModuleTrainer(object):
             suffix = ("%d/%d | %.2f s/it | %s remaining | train loss %.4f | " + self.extra_progressbar_metrics[0]) % \
                      (self.state.current_iteration, train_dataset_loader_size, iteration_elapsed_time,
                       str(datetime.timedelta(seconds=remaining_time_estimation)), self.state.last_train_loss,
-                      *[getattr(self.state, a) for a in self.extra_progressbar_metrics[1]])
+                      *[getattr(self.state, a.state_attribute_name) for a in self.extra_progressbar_metrics[1]])
         else:
             suffix = "%d/%d | %.2f s/it | %s remaining | train loss %.4f" % \
                      (self.state.current_iteration, train_dataset_loader_size, iteration_elapsed_time,

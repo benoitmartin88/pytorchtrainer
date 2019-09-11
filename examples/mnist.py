@@ -59,18 +59,18 @@ if __name__ == '__main__':
     # Validate after every 200 iteration and after every epoch
     trainer.register_post_iteration_callback(ptt.callback.ValidationCallback(validation_loader, metric=ptt.metric.TorchLoss(criterion)), frequency=200)
 
-    validation = ptt.callback.ValidationCallback(validation_loader, metric=ptt.metric.TorchLoss(criterion))
-    trainer.register_post_epoch_callback(validation, frequency=1)
+    validation_callback = ptt.callback.ValidationCallback(validation_loader, metric=ptt.metric.TorchLoss(criterion))
+    trainer.register_post_epoch_callback(validation_callback, frequency=1)
 
     # compute accuracy
-    accuracy = ptt.callback.MetricCallback(metric=ptt.metric.Accuracy(prediction_transform=lambda x: x.argmax(dim=1, keepdim=False)))
-    trainer.register_post_iteration_callback(accuracy, frequency=1)
+    accuracy_callback = ptt.callback.MetricCallback(metric=ptt.metric.Accuracy(prediction_transform=lambda x: x.argmax(dim=1, keepdim=False)))
+    trainer.register_post_iteration_callback(accuracy_callback, frequency=1)
 
     # add validation loss and accuracy in progress bar
-    trainer.add_progressbar_metric("validation loss %.4f | accuracy %.2f", [validation.state_attribute_name, accuracy.state_attribute_name])
+    trainer.add_progressbar_metric("validation loss %.4f | accuracy %.2f", [validation_callback, accuracy_callback])
 
     trainer.train(train_loader,
                   max_epochs=10,
                   stop_condition=ptt.stop_condition.EarlyStopping(patience=2,
-                                                                  metric=lambda state: getattr(state, accuracy.state_attribute_name),
+                                                                  metric=lambda state: getattr(state, accuracy_callback.state_attribute_name),
                                                                   comparison_function=lambda metric, best: round(metric, 2) <= round(best, 2)))

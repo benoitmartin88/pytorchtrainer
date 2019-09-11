@@ -57,16 +57,14 @@ if __name__ == '__main__':
     trainer = ptt.create_default_trainer(model, optimizer, criterion, verbose=1)
 
     # Validate after every 200 iteration and after every epoch
-    trainer.register_post_iteration_callback(ptt.callback.ValidationCallback(validation_loader, metric=ptt.metric.TorchLoss(criterion), validate_every=200))
+    trainer.register_post_iteration_callback(ptt.callback.ValidationCallback(validation_loader, metric=ptt.metric.TorchLoss(criterion)), frequency=200)
 
-    validation = ptt.callback.ValidationCallback(validation_loader, metric=ptt.metric.TorchLoss(criterion), validate_every=1)
-    trainer.register_post_epoch_callback(validation)
+    validation = ptt.callback.ValidationCallback(validation_loader, metric=ptt.metric.TorchLoss(criterion))
+    trainer.register_post_epoch_callback(validation, frequency=1)
 
     # compute accuracy
-    accuracy = ptt.callback.MetricCallback(
-        metric=ptt.metric.Accuracy(prediction_transform=lambda x: x.argmax(dim=1, keepdim=False)),
-        frequency=1)
-    trainer.register_post_iteration_callback(accuracy)
+    accuracy = ptt.callback.MetricCallback(metric=ptt.metric.Accuracy(prediction_transform=lambda x: x.argmax(dim=1, keepdim=False)))
+    trainer.register_post_iteration_callback(accuracy, frequency=1)
 
     # add validation loss and accuracy in progress bar
     trainer.add_progressbar_metric("validation loss %.4f | accuracy %.2f", [validation.state_attribute_name, accuracy.state_attribute_name])

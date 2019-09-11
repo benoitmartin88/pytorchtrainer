@@ -11,17 +11,15 @@ default_best_filename = 'best.pt.tar'
 
 
 class SaveCheckpointCallback(Callback):
-    def __init__(self, save_every=10, save_directory=default_save_diretory, filename=default_filename):
+    def __init__(self, save_directory=default_save_diretory, filename=default_filename):
         super().__init__()
-        self.save_every = save_every
         self.save_directory = save_directory
         self.filename = filename
 
         os.makedirs(self.save_directory, exist_ok=True)
 
     def __call__(self, trainer):
-        if trainer.state.current_epoch % self.save_every == 0:
-            self._save_checkpoint(trainer.model, trainer.optimizer, trainer.state)
+        self._save_checkpoint(trainer.model, trainer.optimizer, trainer.state)
 
     def _save_checkpoint(self, model: nn.Module, optimizer: optim.Optimizer, trainer_state):
         # from .. import __version__
@@ -71,7 +69,7 @@ class LoadCheckpointCallback(Callback):
 class SaveBestCheckpointCallback(SaveCheckpointCallback):
     def __init__(self, state_metric_name: str, saves_to_keep=5, comparison_function=lambda metric, best: metric < best,
                  save_directory=default_save_diretory, filename=default_best_filename):
-        super().__init__(0, save_directory, filename)
+        super().__init__(save_directory, filename)
         self.state_metric_name = state_metric_name
         # self.saves_to_keep = saves_to_keep    # TODO
         self.comparison_function = comparison_function

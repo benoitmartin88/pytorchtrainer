@@ -12,13 +12,15 @@ from test.common import XorModule, XorDataset
 
 
 class MyValidationCallback(ValidationCallback):
-    def __init__(self, dataset_loader, metric, validate_every):
-        super().__init__(dataset_loader, metric, validate_every=validate_every)
+    def __init__(self, dataset_loader, metric):
+        super().__init__(dataset_loader, metric)
         self.has_been_called = False
+        self.number_of_calls = 0
 
     def __call__(self, trainer):
         super().__call__(trainer)
         self.has_been_called = True
+        self.number_of_calls += 1
 
 
 class MySaveBestCheckpointCallback(SaveBestCheckpointCallback):
@@ -64,31 +66,42 @@ class TestCallback(unittest.TestCase):
 
     def test_frequency_error(self):
         from pytorchtrainer.callback import Callback
-        self.assertRaises(ValueError, Callback, frequency=-1)
-        self.assertRaises(NotImplementedError, Callback(frequency=0), trainer=None)
+        self.assertRaises(NotImplementedError, Callback(), trainer=None)
 
     def test_validation(self):
-        validation_callback = MyValidationCallback(self.train_loader, TorchLoss(self.criterion), validate_every=1)
+        validation_callback = MyValidationCallback(self.train_loader, TorchLoss(self.criterion))
 
         trainer = create_default_trainer(self.model, self.optimizer, self.criterion)
-        trainer.register_post_iteration_callback(validation_callback)
-        trainer.register_post_iteration_callback(file_writer.CsvWriter(save_every=1,
-                                                                       extra_header=[validation_callback.state_attribute_name],
-                                                                       callback=lambda state: [state.get(validation_callback.state_attribute_name)]))
-        trainer.register_post_epoch_callback(validation_callback)
+        trainer.register_post_iteration_callback(validation_callback, frequency=1)
+        trainer.register_post_iteration_callback(file_writer.CsvWriter(extra_header=[validation_callback.state_attribute_name],
+                                                                       callback=lambda state: [state.get(validation_callback.state_attribute_name)]), frequency=1)
+        trainer.register_post_epoch_callback(validation_callback, frequency=1)
         trainer.train(self.train_loader, max_epochs=5)
 
         self.assertTrue(validation_callback.has_been_called)
         self.assertTrue(trainer.state.last_validation_loss != float('inf'))
 
     def test_save_best(self):
-        validation_callback = ValidationCallback(self.train_loader, TorchLoss(self.criterion), validate_every=1)
+        validation_callback = ValidationCallback(self.train_loader, TorchLoss(self.criterion))
         callback = MySaveBestCheckpointCallback(validation_callback.state_attribute_name, saves_to_keep=1)
 
         trainer = create_default_trainer(self.model, self.optimizer, self.criterion)
-        trainer.register_post_epoch_callback(validation_callback)
-        trainer.register_post_epoch_callback(callback)
+        trainer.register_post_epoch_callback(validation_callback, frequency=1)
+        trainer.register_post_epoch_callback(callback, frequency=1)
         trainer.train(self.train_loader, max_epochs=10)
 
         self.assertTrue(callback.has_been_called)
+
+    def test_same_callback_post_iteration_and_post_epoch(self):
+        validation_callback = MyValidationCallback(self.train_loader, TorchLoss(self.criterion))
+
+        trainer = create_default_trainer(self.model, self.optimizer, self.criterion)
+
+        trainer.register_post_epoch_callback(validation_callback, frequency=1)
+        trainer.register_post_iteration_callback(validation_callback, frequency=2)
+
+        trainer.train(self.train_loader, max_epochs=10)
+
+        self.assertTrue(validation_callback.has_been_called)
+        self.assertEqual(validation_callback.number_of_calls, 30)   # 10 epochs + 20 iterations
 

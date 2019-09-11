@@ -3,11 +3,10 @@ from .callback import Callback
 
 
 class ValidationCallback(Callback):
-    def __init__(self, dataset_loader, metric, validate_every=10, device=None, dtype=None, non_blocking=False):
-        super().__init__(frequency=validate_every, state_attribute_name="last_validation_%s" % metric.name, state_attribute_default_value=metric.default_value)
+    def __init__(self, dataset_loader, metric, device=None, dtype=None, non_blocking=False):
+        super().__init__(state_attribute_name="last_validation_%s" % metric.name, state_attribute_default_value=metric.default_value)
         self.dataset_loader = dataset_loader
         self.metric = metric
-        self.validate_every = validate_every
         self.device = device
         self.dtype = dtype
         self.non_blocking = non_blocking

@@ -1,9 +1,6 @@
 
 class Callback(object):
-    def __init__(self, frequency=1, state_attribute_name=None, state_attribute_default_value=None):
-        if frequency < 0:
-            raise ValueError("frequency argument should be positive.")
-        self.frequency = frequency
+    def __init__(self, state_attribute_name=None, state_attribute_default_value=None):
         self.state_attribute_name = state_attribute_name
         self.state_attribute_default_value = state_attribute_default_value
 

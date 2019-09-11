@@ -63,7 +63,7 @@ class TestStopCondition(unittest.TestCase):
         self.assertTrue(trainer.state.current_epoch < self.MAX_EPOCHS)
 
     def test_early_stopping_accuracy(self):
-        accuracy = MetricCallback(metric=Accuracy(prediction_transform=lambda x: x.round()), frequency=1)
+        accuracy = MetricCallback(metric=Accuracy(prediction_transform=lambda x: x.round()))
 
         early_stopping = MyEarlyStopping(patience=50,
                                          metric=lambda state: getattr(state, accuracy.state_attribute_name),

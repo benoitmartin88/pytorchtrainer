@@ -68,14 +68,14 @@ class TestTrainer(unittest.TestCase):
 
     def test_checkpoint_save(self):
         trainer = create_default_trainer(self.model, self.optimizer, self.criterion)
-        trainer.register_post_epoch_callback(checkpoint.SaveCheckpointCallback(save_every=1))
+        trainer.register_post_epoch_callback(checkpoint.SaveCheckpointCallback())
         trainer.train(self.train_loader, max_epochs=1)
 
         self.assertTrue(os.path.exists(os.path.join(checkpoint.default_save_diretory, checkpoint.default_filename)))
 
     def test_checkpoint_load(self):
         trainer = create_default_trainer(self.model, self.optimizer, self.criterion)
-        trainer.register_post_epoch_callback(checkpoint.SaveCheckpointCallback(save_every=1))
+        trainer.register_post_epoch_callback(checkpoint.SaveCheckpointCallback())
         trainer.train(self.train_loader, max_epochs=1)
 
         self.assertTrue(os.path.exists(os.path.join(checkpoint.default_save_diretory, checkpoint.default_filename)))
@@ -104,7 +104,7 @@ class TestTrainer(unittest.TestCase):
         self.assertEqual(2, trainer.state.current_epoch)
 
     def test_log_save(self):
-        writer = file_writer.CsvWriter(save_every=1, extra_header=['test'], callback=lambda trainer: [42])
+        writer = file_writer.CsvWriter(extra_header=['test'], callback=lambda trainer: [42])
 
         trainer = create_default_trainer(self.model, self.optimizer, self.criterion)
         trainer.register_post_epoch_callback(writer)
@@ -116,12 +116,11 @@ class TestTrainer(unittest.TestCase):
         trainer = create_default_trainer(self.model, self.optimizer, self.criterion)
 
         # Validation callback
-        trainer.register_post_epoch_callback(ValidationCallback(self.train_loader, metric=TorchLoss(self.criterion), validate_every=1))
+        trainer.register_post_epoch_callback(ValidationCallback(self.train_loader, metric=TorchLoss(self.criterion)))
 
         # Accuracy
         trainer.register_post_iteration_callback(MetricCallback(
-            metric=Accuracy(prediction_transform=self.prediction_transform),
-            frequency=1))
+            metric=Accuracy(prediction_transform=self.prediction_transform)))
 
         trainer.add_progressbar_metric("validation loss %.4f | accuracy %.2f", ["last_validation_loss", "accuracy"])
 

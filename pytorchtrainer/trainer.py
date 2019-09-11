@@ -118,35 +118,43 @@ class ModuleTrainer(object):
             raise TypeError("format should be string (eg: '%.2f') and metric_state_names should be a list of metric names (eg: 'accuracy')")
         self.extra_progressbar_metrics = (format, metric_state_names)
 
-    def register_post_iteration_callback(self, callback: Callback):
+    def register_post_iteration_callback(self, callback: Callback, frequency: int = 1):
         """
         Add a callback function that will be run after each iteration
         :param callback: Function that will be run
+        :param frequency: Frequency at which the callback will be called
         """
-        callback.set_trainer(self)  # This is done here to simplify the API by hiding this from the user
-        self.__post_iteration_callback.append(callback)
+        if frequency < 0:
+            raise ValueError("frequency argument should be positive.")
 
-    def register_post_epoch_callback(self, callback: Callback):
+        callback.set_trainer(self)  # This is done here to simplify the API by hiding this from the user
+        self.__post_iteration_callback.append((frequency, callback))
+
+    def register_post_epoch_callback(self, callback: Callback, frequency: int = 1):
         """
         Add a callback function that will be run after each epoch
         :param callback: Function that will be run
+        :param frequency: Frequency at which the callback will be called
         """
+        if frequency < 0:
+            raise ValueError("frequency argument should be positive.")
+
         callback.set_trainer(self)    # This is done here to simplify the API by hiding this from the user
-        self.__post_epoch_callback.append(callback)
+        self.__post_epoch_callback.append((frequency, callback))
 
     def __graceful_exit(self, signum, frame):
         print("Sig %s caught. Graceful exit has been called. Currently running epoch will be finished." % signum)
         self.stop_condition = lambda state: True
 
     def __run_post_iteration_callbacks(self):
-        for cb in self.__post_iteration_callback:
-            if cb.frequency != 0 and self.state.current_iteration % cb.frequency == 0:
-                cb(self)
+        for frequency, callback in self.__post_iteration_callback:
+            if frequency != 0 and self.state.current_iteration % frequency == 0:
+                callback(self)
 
     def __run_post_epoch_callbacks(self):
-        for cb in self.__post_epoch_callback:
-            if cb.frequency != 0 and self.state.current_epoch % cb.frequency == 0:
-                cb(self)
+        for frequency, callback in self.__post_epoch_callback:
+            if frequency != 0 and self.state.current_epoch % frequency == 0:
+                callback(self)
 
     def __update_progress_bar(self, iteration_elapsed_time, train_dataset_loader_size, max_epochs):
         remaining_time_estimation = int(iteration_elapsed_time * (train_dataset_loader_size - self.state.current_iteration))

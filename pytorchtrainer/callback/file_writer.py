@@ -9,10 +9,9 @@ default_filename = 'log.cvs'
 
 
 class CsvWriter(Callback):
-    def __init__(self, save_every=10, save_directory=default_save_directory, filename=default_filename, delimiter=';',
+    def __init__(self, save_directory=default_save_directory, filename=default_filename, delimiter=';',
                  extra_header=None, callback=None):
-        super().__init__(frequency=save_every)
-        self.save_every = save_every
+        super().__init__()
         file, ext = filename.rsplit('.', 1)
         self.log_file_path = os.path.join(save_directory, file + '_' + time.strftime("%Y%M%d_%H%M%S") + '.' + ext)
         self.delimiter = delimiter

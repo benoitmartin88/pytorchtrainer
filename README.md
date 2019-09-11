@@ -43,7 +43,7 @@ trainer = ptt.create_default_trainer(model, optimizer, criterion)
 trainer.register_post_epoch_callback(ptt.checkpoint.SaveCheckpointCallback(save_every=10))
 
 # optionally compute validation loss after every epoch
-validation_callback = ptt.callback.ValidationCallback(validation_loader, ptt.metric.Loss(criterion), validate_every=1)
+validation_callback = ptt.callback.ValidationCallback(validation_loader, ptt.metric.TorchLoss(criterion), validate_every=1)
 trainer.register_post_epoch_callback(validation_callback)
 
 # optionally save training and validation loss after every iteration using default save directory

@@ -6,7 +6,7 @@ from torch.utils.data import DataLoader
 
 from pytorchtrainer import create_default_trainer
 from pytorchtrainer.callback import ValidationCallback, SaveBestCheckpointCallback, checkpoint, file_writer
-from pytorchtrainer.metric import Loss
+from pytorchtrainer.metric import TorchLoss
 
 from test.common import XorModule, XorDataset
 
@@ -63,7 +63,7 @@ class TestCallback(unittest.TestCase):
         shutil.rmtree(os.path.join(file_writer.default_save_directory), ignore_errors=True)
 
     def test_validation(self):
-        validation_callback = MyValidationCallback(self.train_loader, Loss(self.criterion), validate_every=1)
+        validation_callback = MyValidationCallback(self.train_loader, TorchLoss(self.criterion), validate_every=1)
 
         trainer = create_default_trainer(self.model, self.optimizer, self.criterion)
         trainer.register_post_iteration_callback(validation_callback)
@@ -77,7 +77,7 @@ class TestCallback(unittest.TestCase):
         self.assertTrue(trainer.state.last_validation_loss != float('inf'))
 
     def test_save_best(self):
-        validation_callback = ValidationCallback(self.train_loader, Loss(self.criterion), validate_every=1)
+        validation_callback = ValidationCallback(self.train_loader, TorchLoss(self.criterion), validate_every=1)
         callback = MySaveBestCheckpointCallback(validation_callback.state_attribute_name, saves_to_keep=1)
 
         trainer = create_default_trainer(self.model, self.optimizer, self.criterion)

@@ -1,6 +1,5 @@
 import torch
 from .callback import Callback
-from ..utils import batch_to_tensor
 
 
 class ValidationCallback(Callback):
@@ -27,6 +26,8 @@ class ValidationCallback(Callback):
             device_to_use = models_device
 
         model.to(device_to_use)
+
+        self.metric.reset()
 
         with torch.no_grad():
             for batch in self.dataset_loader:

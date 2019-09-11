@@ -1,6 +1,6 @@
 # PyTorch trainer
 
-[![CircleCI](https://circleci.com/gh/benoitmartin88/pytorch-trainer/tree/master.svg?style=svg)](https://circleci.com/gh/benoitmartin88/pytorch-trainer/tree/master)
+[![CircleCI](https://circleci.com/gh/benoitmartin88/pytorchtrainer/tree/master.svg?style=svg)](https://circleci.com/gh/benoitmartin88/pytorchtrainer/tree/master)
 
 Are you tired of writing those same epoch and data-loader loops to train your PyTorch module ?
 Look no further, PyTorch trainer is a library that hides all those boring training lines of code that should be native to PyTorch. 
@@ -18,7 +18,7 @@ You will also benefit from the following features:
 
 ## Example
 
-Code examples can be found in the [example folder](https://github.com/benoitmartin88/pytorch-trainer/tree/master/examples).
+Code examples can be found in the [example folder](https://github.com/benoitmartin88/pytorchtrainer/tree/master/examples).
 
 Here is a simple example:
 
@@ -43,7 +43,7 @@ trainer = ptt.create_default_trainer(model, optimizer, criterion)
 trainer.register_post_epoch_callback(ptt.checkpoint.SaveCheckpointCallback(save_every=10))
 
 # optionally compute validation loss after every epoch
-validation_callback = ptt.callback.ValidationCallback(validation_loader, ptt.metric.Loss(criterion), validate_every=1)
+validation_callback = ptt.callback.ValidationCallback(validation_loader, ptt.metric.TorchLoss(criterion), validate_every=1)
 trainer.register_post_epoch_callback(validation_callback)
 
 # optionally save training and validation loss after every iteration using default save directory

@@ -18,4 +18,4 @@ class Metric(object):
 
 from .accuracy import Accuracy
 from .mean_absolute_error import MeanAbsoluteError
-from .loss import Loss
+from .torch_loss import TorchLoss

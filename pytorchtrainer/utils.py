@@ -8,7 +8,7 @@ def batch_to_tensor(batch, device=None, non_blocking=False, dtype=None):
 
     x = x.to(device=device, dtype=dtype, non_blocking=non_blocking)
     y = y.to(device=device, dtype=dtype, non_blocking=non_blocking)
-    return x, y
+    return x, y, dict()
 
 
 def print_progress(iteration, total, prefix='', suffix='', decimals=1, bar_length=100):

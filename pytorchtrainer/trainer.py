@@ -41,7 +41,7 @@ class ModuleTrainer(object):
     Runs a training configurable training loop over a model.
     """
     def __init__(self, model: nn.Module, optimizer: optim.Optimizer, train_function,
-                 init_callback=None, verbose=1):
+                 prepare_batch_function=batch_to_tensor, init_callback=None, verbose=1):
         """
         :param model: PyTorch model (nn.Module) that is to be trained.
         :param optimizer: PyTorch optimizer (optim.Optimizer) that will be used.
@@ -51,6 +51,8 @@ class ModuleTrainer(object):
         """
         if not callable(train_function):
             raise TypeError("Argument compute_function should be a function.")
+        if not callable(prepare_batch_function):
+            raise TypeError("Argument prepare_batch_function should be a function.")
 
         signal.signal(signal.SIGINT, self.__graceful_exit)
 
@@ -58,6 +60,7 @@ class ModuleTrainer(object):
         self.model = model
         self.optimizer = optimizer
         self.train_function = train_function
+        self.prepare_batch_function = prepare_batch_function
 
         self.__post_iteration_callback = []
         self.__post_epoch_callback = []
@@ -166,7 +169,7 @@ class ModuleTrainer(object):
 
 def create_default_trainer(model: nn.Module, optimizer: optim.Optimizer, criterion,
                            device=None, dtype=None, non_blocking=False,
-                           prepare_batch=batch_to_tensor,
+                           prepare_batch_function=batch_to_tensor,
                            output_transform=lambda x, y, y_pred, loss: (x, y, y_pred, loss.item()),
                            init_callback=None,
                            verbose=1):
@@ -179,15 +182,15 @@ def create_default_trainer(model: nn.Module, optimizer: optim.Optimizer, criteri
     :param device: device to use. eg: 'cpu' (default) or 'cuda'.
     :param dtype: Passed to `prepare_batch` argument to change the model's data type. eg: `torch.float32` or `torch.float64`.
     :param non_blocking: Passed to `prepare_batch`.
-    :param prepare_batch: Function that prepares a batch. This should return a `torch.Tensor`.
+    :param prepare_batch_function: Function that prepares a batch. This should return a `torch.Tensor`.
     :param output_transform: Optionally transform the `x`, `y`, `y_prediction` and `loss`.
     :param init_callback: Passed to `ModuleTrainer`'s constructor.
     :param verbose: Currently only used to show the progressbar. By default this is set to 1.
     :return: An instance of `ModuleTrainer`.
     """
 
-    if not callable(prepare_batch):
-        raise TypeError("Argument prepare_batch should be a function.")
+    if not callable(prepare_batch_function):
+        raise TypeError("Argument prepare_batch_function should be a function.")
     if not callable(output_transform):
         raise TypeError("Argument output_transform should be a function.")
 
@@ -205,8 +208,8 @@ def create_default_trainer(model: nn.Module, optimizer: optim.Optimizer, criteri
     def _default_train_function(batch):
         model.train()
         optimizer.zero_grad()
-        x, y = prepare_batch(batch, device=device, dtype=dtype, non_blocking=non_blocking)
-        y_pred = model(x)
+        x, y, model_args = prepare_batch_function(batch, device=device, dtype=dtype, non_blocking=non_blocking)
+        y_pred = model(x, **model_args)
         loss = criterion(y_pred, y)
         loss.backward()
         optimizer.step()
@@ -214,5 +217,6 @@ def create_default_trainer(model: nn.Module, optimizer: optim.Optimizer, criteri
 
     return ModuleTrainer(model, optimizer,
                          train_function=_default_train_function,
+                         prepare_batch_function=prepare_batch_function,
                          init_callback=init_callback,
                          verbose=verbose)

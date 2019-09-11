@@ -6,7 +6,7 @@ from torch.utils.data import DataLoader
 
 from pytorchtrainer import create_default_trainer, ModuleTrainer
 from pytorchtrainer.callback import checkpoint, file_writer, MetricCallback, ValidationCallback
-from pytorchtrainer.metric import Accuracy, Loss
+from pytorchtrainer.metric import Accuracy, TorchLoss
 
 from test.common import XorModule, XorDataset
 
@@ -116,7 +116,7 @@ class TestTrainer(unittest.TestCase):
         trainer = create_default_trainer(self.model, self.optimizer, self.criterion)
 
         # Validation callback
-        trainer.register_post_epoch_callback(ValidationCallback(self.train_loader, metric=Loss(self.criterion), validate_every=1))
+        trainer.register_post_epoch_callback(ValidationCallback(self.train_loader, metric=TorchLoss(self.criterion), validate_every=1))
 
         # Accuracy
         trainer.register_post_iteration_callback(MetricCallback(

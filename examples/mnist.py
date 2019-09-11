@@ -57,9 +57,9 @@ if __name__ == '__main__':
     trainer = ptt.create_default_trainer(model, optimizer, criterion, verbose=1)
 
     # Validate after every 200 iteration and after every epoch
-    trainer.register_post_iteration_callback(ptt.callback.ValidationCallback(validation_loader, metric=ptt.metric.Loss(criterion), validate_every=200))
+    trainer.register_post_iteration_callback(ptt.callback.ValidationCallback(validation_loader, metric=ptt.metric.TorchLoss(criterion), validate_every=200))
 
-    validation = ptt.callback.ValidationCallback(validation_loader, metric=ptt.metric.Loss(criterion), validate_every=1)
+    validation = ptt.callback.ValidationCallback(validation_loader, metric=ptt.metric.TorchLoss(criterion), validate_every=1)
     trainer.register_post_epoch_callback(validation)
 
     # compute accuracy

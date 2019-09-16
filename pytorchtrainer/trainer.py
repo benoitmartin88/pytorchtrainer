@@ -188,6 +188,7 @@ class ModuleTrainer(object):
 def create_default_trainer(model: nn.Module, optimizer: optim.Optimizer, criterion,
                            device=None, dtype=None, non_blocking=False,
                            prepare_batch_function=batch_to_tensor,
+                           loss_transform_function=lambda criterion, y_preds, y: criterion(y_preds, y),
                            output_transform=lambda x, y, y_pred, loss: (x, y, y_pred, loss.item()),
                            init_callback=None,
                            verbose=1):
@@ -201,7 +202,8 @@ def create_default_trainer(model: nn.Module, optimizer: optim.Optimizer, criteri
     :param dtype: Passed to `prepare_batch` argument to change the model's data type. eg: `torch.float32` or `torch.float64`.
     :param non_blocking: Passed to `prepare_batch`.
     :param prepare_batch_function: Function that prepares a batch. This should return a `torch.Tensor`.
-    :param output_transform: Optionally transform the `x`, `y`, `y_prediction` and `loss`.
+    :param loss_transform_function: Optionally transform the loss function's output. Can be useful with multi-output models.
+    :param output_transform: Optionally transform the `x`, `y`, `y_prediction` and `loss`. Can be useful with multi-output models.
     :param init_callback: Passed to `ModuleTrainer`'s constructor.
     :param verbose: Currently only used to show the progressbar. By default this is set to 1.
     :return: An instance of `ModuleTrainer`.
@@ -228,10 +230,12 @@ def create_default_trainer(model: nn.Module, optimizer: optim.Optimizer, criteri
         optimizer.zero_grad()
         x, y, model_args = prepare_batch_function(batch, device=device, dtype=dtype, non_blocking=non_blocking)
         y_pred = model(x, **model_args)
-        loss = criterion(y_pred, y)
+        loss = loss_transform_function(criterion, y_pred, y)
         loss.backward()
         optimizer.step()
-        return output_transform(x, y, y_pred.detach(), loss.detach())
+
+        # does y_pred need detach() ?
+        return output_transform(x, y, y_pred, loss.detach())
 
     return ModuleTrainer(model, optimizer,
                          train_function=_default_train_function,

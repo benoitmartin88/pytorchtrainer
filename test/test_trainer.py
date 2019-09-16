@@ -8,7 +8,7 @@ from pytorchtrainer import create_default_trainer, ModuleTrainer
 from pytorchtrainer.callback import checkpoint, file_writer, MetricCallback, ValidationCallback
 from pytorchtrainer.metric import Accuracy, TorchLoss
 
-from test.common import XorModule, XorDataset
+from test.common import XorModule, XorMultiOutputModule, XorDataset
 
 
 class TestTrainer(unittest.TestCase):
@@ -20,6 +20,7 @@ class TestTrainer(unittest.TestCase):
         torch.backends.cudnn.benchmark = False
 
         self.model = XorModule()
+        self.multiOutputModel = XorMultiOutputModule()
         self.optimizer = torch.optim.Adam(self.model.parameters(), lr=1e-2)
         self.criterion = torch.nn.MSELoss()
 
@@ -51,6 +52,10 @@ class TestTrainer(unittest.TestCase):
             for i, batch in enumerate(train_loader, 0):
                 x, y = batch[0], batch[1]
                 y_pred = model(x)
+
+                if len(y_pred) > 1:
+                    y_pred = y_pred[0]
+
                 print("x=%s, y=%s" % (x, y_pred.item()))
                 self.assertEqual(self.prediction_transform(y_pred), int(y.item()))
 
@@ -59,6 +64,18 @@ class TestTrainer(unittest.TestCase):
         trainer.train(self.train_loader, max_epochs=100)
 
         self._evaluate_model(self.model, self.train_loader)
+
+    def test_multi_output_xor(self):
+        model = XorMultiOutputModule()
+        optimizer = torch.optim.Adam(model.parameters(), lr=1e-2)
+
+        trainer = create_default_trainer(model, optimizer, self.criterion,
+                                         loss_transform_function=lambda criterion, y_preds, y: criterion(y_preds[0], y) + 0.5*criterion(y_preds[1], y),
+                                         output_transform=lambda x, y, y_pred, loss: (x, y, y_pred[0], loss.item()),)
+
+        trainer.train(self.train_loader, max_epochs=100)
+
+        self._evaluate_model(model, self.train_loader)
 
     def test_dtype(self):
         for dtype in [torch.float32, torch.float64]:

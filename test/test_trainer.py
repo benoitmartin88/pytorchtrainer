@@ -71,7 +71,7 @@ class TestTrainer(unittest.TestCase):
 
         trainer = create_default_trainer(model, optimizer, self.criterion,
                                          loss_transform_function=lambda criterion, y_preds, y: criterion(y_preds[0], y) + 0.5*criterion(y_preds[1], y),
-                                         output_transform=lambda x, y, y_pred, loss: (x, y, y_pred[0], loss.item()),)
+                                         output_transform_function=lambda x, y, y_pred, loss: (x, y, y_pred[0], loss.item()), )
 
         trainer.train(self.train_loader, max_epochs=100)
 

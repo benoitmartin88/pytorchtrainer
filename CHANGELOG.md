@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 # Unreleased
 ## New
 - `ModuleTrainer.evaluate` method
+- Add CsvWriter to evaluate method
+- Add `filename_transform_function` argument to `SaveBestCheckpointCallback` 
 
 ## Change
 - Rename `dateset_loader` to `dataloader`

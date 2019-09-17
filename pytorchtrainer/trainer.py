@@ -9,7 +9,7 @@ import torch.nn as nn
 import torch.optim as optim
 
 from .metric import Metric
-from .callback import Callback
+from .callback import Callback, CsvWriter
 from .stop_condition import NoStopping
 from .utils import print_progress, batch_to_tensor
 
@@ -118,14 +118,14 @@ class ModuleTrainer(object):
 
         print("train time %.2f" % (time() - train_start))
 
-    def evaluate(self, dataloader: torch.utils.data.DataLoader, metric: Metric):
+    def evaluate(self, dataloader: torch.utils.data.DataLoader, metric: Metric, csv_writer: CsvWriter = CsvWriter()):
         """
         Evaluate a model.
         :param dataloader:  PyTorch DataLoader that will be used to load the evaluation batches.
         :param metric:  Metric object that will be used to compute the evaluation metric.
+        :param csv_writer: `CsvWriter` callback to be used to log the evaluations.
         :return:    Computed metric after having evaluated the model across the entire dataloader.
         """
-
         previous_training_flag = self.model.training
 
         self.model.eval()
@@ -133,8 +133,11 @@ class ModuleTrainer(object):
 
         with torch.no_grad():
             for batch in dataloader:
-                _, y, y_pred, _ = self.evaluate_function(batch)
+                x, y, y_pred, _ = self.evaluate_function(batch)
                 metric.step(y, y_pred)
+
+                if csv_writer is not None:
+                    csv_writer(self)
 
         self.model.train(previous_training_flag)
         return metric.compute()

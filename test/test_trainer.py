@@ -5,7 +5,7 @@ import torch
 from torch.utils.data import DataLoader
 
 from pytorchtrainer import create_default_trainer, ModuleTrainer
-from pytorchtrainer.callback import checkpoint, file_writer, MetricCallback, ValidationCallback
+from pytorchtrainer.callback import checkpoint, file_writer, MetricCallback, ValidationCallback, CsvWriter
 from pytorchtrainer.metric import Accuracy, TorchLoss
 
 from test.common import XorModule, XorMultiOutputModule, XorDataset
@@ -70,7 +70,9 @@ class TestTrainer(unittest.TestCase):
         trainer = self.test_xor()
         previous_training_flag = trainer.model.training
 
-        res = trainer.evaluate(self.train_loader, metric=Accuracy(prediction_transform=lambda x: x.round()))
+        res = trainer.evaluate(self.train_loader, metric=Accuracy(prediction_transform=lambda y_pred: self.prediction_transform(y_pred)),
+                               csv_writer=CsvWriter(extra_header=["y", "y_pred", "loss"]),
+                               csv_writer_extra_data_function=lambda x, y, y_pred, loss: [y.item(), y_pred.item(), loss.item()])
         print("%.1f" % res)
         self.assertAlmostEqual(res, 1.0)
         self.assertEqual(previous_training_flag, trainer.model.training)
@@ -92,7 +94,7 @@ class TestTrainer(unittest.TestCase):
         trainer = self.test_multi_output_xor()
         previous_training_flag = trainer.model.training
 
-        res = trainer.evaluate(self.train_loader, metric=Accuracy(prediction_transform=lambda x: x.round()))
+        res = trainer.evaluate(self.train_loader, metric=Accuracy(prediction_transform=lambda y_pred: self.prediction_transform(y_pred)))
         print("%.1f" % res)
         self.assertAlmostEqual(res, 1.0)
         self.assertEqual(previous_training_flag, trainer.model.training)
@@ -141,7 +143,7 @@ class TestTrainer(unittest.TestCase):
         self.assertEqual(2, trainer.state.current_epoch)
 
     def test_log_save(self):
-        writer = file_writer.CsvWriter(extra_header=['test'], callback=lambda trainer: [42])
+        writer = file_writer.CsvWriter(extra_header=['test'], extra_data_function=lambda trainer: [42])
 
         trainer = create_default_trainer(self.model, self.optimizer, self.criterion)
         trainer.register_post_epoch_callback(writer)

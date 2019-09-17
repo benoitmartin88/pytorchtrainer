@@ -13,6 +13,7 @@ class MeanAbsoluteError(Metric):
         absolute_errors = torch.abs(y - y_pred)
         self._absolute_error_sum += torch.sum(absolute_errors).item()
         self._total += y.size(dim=0)    # dim 0 should be batch size
+        return torch.sum(absolute_errors)
 
     def compute(self):
         if self._total == 0:

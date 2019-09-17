@@ -6,7 +6,7 @@ class Metric(object):
         self.name = name.replace(' ', '_')
         self.default_value = default_value
 
-    def step(self, y: torch.Tensor, y_pred: torch.Tensor):
+    def step(self, y: torch.Tensor, y_pred: torch.Tensor) -> torch.Tensor:
         raise NotImplementedError()
 
     def compute(self):

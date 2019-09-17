@@ -118,12 +118,15 @@ class ModuleTrainer(object):
 
         print("train time %.2f" % (time() - train_start))
 
-    def evaluate(self, dataloader: torch.utils.data.DataLoader, metric: Metric, csv_writer: CsvWriter = CsvWriter()):
+    def evaluate(self, dataloader: torch.utils.data.DataLoader, metric: Metric,
+                 csv_writer: CsvWriter = None, csv_writer_extra_data_function=lambda x, y, y_pred, loss: list()):
         """
         Evaluate a model.
         :param dataloader:  PyTorch DataLoader that will be used to load the evaluation batches.
         :param metric:  Metric object that will be used to compute the evaluation metric.
         :param csv_writer: `CsvWriter` callback to be used to log the evaluations.
+        :param csv_writer_extra_data_function: function that returns a list of values that are to be written by the `csv_writer`.
+                                               The length of the returned list must be the same as the list `CsvWriter.extra_header`.
         :return:    Computed metric after having evaluated the model across the entire dataloader.
         """
         previous_training_flag = self.model.training
@@ -131,13 +134,15 @@ class ModuleTrainer(object):
         self.model.eval()
         metric.reset()
 
+        if csv_writer is None:
+            csv_writer = CsvWriter()
+
         with torch.no_grad():
             for batch in dataloader:
                 x, y, y_pred, _ = self.evaluate_function(batch)
-                metric.step(y, y_pred)
+                loss = metric.step(y, y_pred)
 
-                if csv_writer is not None:
-                    csv_writer(self)
+                csv_writer(self, extra_data=csv_writer_extra_data_function(x, y, y_pred, loss))
 
         self.model.train(previous_training_flag)
         return metric.compute()

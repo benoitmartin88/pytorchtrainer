@@ -18,6 +18,7 @@ class Accuracy(Metric):
 
         self._total_correct += torch.sum(correct).item()
         self._total += correct.size(dim=0)    # dim 0 should be batch size
+        return torch.sum(correct).float() / correct.size(dim=0)
 
     def compute(self):
         if self._total == 0:

@@ -133,7 +133,7 @@ class ModuleTrainer(object):
 
         with torch.no_grad():
             for batch in dataloader:
-                x, y, y_pred, _ = self.evaluate_function(batch)
+                _, y, y_pred, _ = self.evaluate_function(batch)
                 metric.step(y, y_pred)
 
         self.model.train(previous_training_flag)

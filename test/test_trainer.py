@@ -68,9 +68,12 @@ class TestTrainer(unittest.TestCase):
 
     def test_trainer_evaluate_xor(self):
         trainer = self.test_xor()
-        res = trainer.evaluate(self.train_loader, metric=TorchLoss(self.criterion))
-        print("%.20f" % res)
-        self.assertAlmostEqual(res, 0.00693922817299608141, delta=1e-20)
+        previous_training_flag = trainer.model.training
+
+        res = trainer.evaluate(self.train_loader, metric=Accuracy(prediction_transform=lambda x: x.round()))
+        print("%.1f" % res)
+        self.assertAlmostEqual(res, 1.0)
+        self.assertEqual(previous_training_flag, trainer.model.training)
 
     def test_multi_output_xor(self):
         model = XorMultiOutputModule()
@@ -87,9 +90,12 @@ class TestTrainer(unittest.TestCase):
 
     def test_trainer_evaluate_multi_output_xor(self):
         trainer = self.test_multi_output_xor()
-        res = trainer.evaluate(self.train_loader, metric=TorchLoss(self.criterion))
-        print("%.20f" % res)
-        self.assertAlmostEqual(res, 0.00000805078892085476, delta=1e-20)
+        previous_training_flag = trainer.model.training
+
+        res = trainer.evaluate(self.train_loader, metric=Accuracy(prediction_transform=lambda x: x.round()))
+        print("%.1f" % res)
+        self.assertAlmostEqual(res, 1.0)
+        self.assertEqual(previous_training_flag, trainer.model.training)
 
     def test_dtype(self):
         for dtype in [torch.float32, torch.float64]:

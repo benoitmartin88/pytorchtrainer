@@ -64,18 +64,32 @@ class TestTrainer(unittest.TestCase):
         trainer.train(self.train_loader, max_epochs=100)
 
         self._evaluate_model(self.model, self.train_loader)
+        return trainer
+
+    def test_trainer_evaluate_xor(self):
+        trainer = self.test_xor()
+        res = trainer.evaluate(self.train_loader, metric=TorchLoss(self.criterion))
+        print("%.20f" % res)
+        self.assertAlmostEqual(res, 0.00693922817299608141, delta=1e-20)
 
     def test_multi_output_xor(self):
         model = XorMultiOutputModule()
         optimizer = torch.optim.Adam(model.parameters(), lr=1e-2)
 
         trainer = create_default_trainer(model, optimizer, self.criterion,
-                                         loss_transform_function=lambda criterion, y_preds, y: criterion(y_preds[0], y) + 0.5*criterion(y_preds[1], y),
-                                         output_transform_function=lambda x, y, y_pred, loss: (x, y, y_pred[0], loss.item()), )
+                                         loss_transform_function=lambda criterion, y_preds, y: criterion(y_preds[0], y) + 0.5 * criterion(y_preds[1], y),
+                                         output_transform_function=lambda x, y, y_pred, loss: (x, y, y_pred[0], loss.item() if loss is not None else None))
 
         trainer.train(self.train_loader, max_epochs=100)
 
         self._evaluate_model(model, self.train_loader)
+        return trainer
+
+    def test_trainer_evaluate_multi_output_xor(self):
+        trainer = self.test_multi_output_xor()
+        res = trainer.evaluate(self.train_loader, metric=TorchLoss(self.criterion))
+        print("%.20f" % res)
+        self.assertAlmostEqual(res, 0.00000805078892085476, delta=1e-20)
 
     def test_dtype(self):
         for dtype in [torch.float32, torch.float64]:

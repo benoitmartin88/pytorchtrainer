@@ -8,6 +8,7 @@ import torch.utils.data
 import torch.nn as nn
 import torch.optim as optim
 
+from .metric import Metric
 from .callback import Callback
 from .stop_condition import NoStopping
 from .utils import print_progress, batch_to_tensor
@@ -40,17 +41,20 @@ class ModuleTrainer(object):
     """
     Runs a training configurable training loop over a model.
     """
-    def __init__(self, model: nn.Module, optimizer: optim.Optimizer, train_function,
+    def __init__(self, model: nn.Module, optimizer: optim.Optimizer, train_function, evaluate_function,
                  prepare_batch_function=batch_to_tensor, init_callback=None, verbose=1):
         """
         :param model: PyTorch model (nn.Module) that is to be trained.
         :param optimizer: PyTorch optimizer (optim.Optimizer) that will be used.
         :param train_function: The main training function that will be run within the epoch and iteration loops.
+        :param evaluate_function: The evaluation function that will be used.
         :param init_callback: A function that will be run at the end of the trainer's constructor. Can be used to load/resume a previously trained model.
         :param verbose: Currently only used to show the progressbar. By default this is set to 1.
         """
         if not callable(train_function):
-            raise TypeError("Argument compute_function should be a function.")
+            raise TypeError("Argument train_function should be a function.")
+        if not callable(evaluate_function):
+            raise TypeError("Argument evaluate_function should be a function.")
         if not callable(prepare_batch_function):
             raise TypeError("Argument prepare_batch_function should be a function.")
 
@@ -60,6 +64,7 @@ class ModuleTrainer(object):
         self.model = model
         self.optimizer = optimizer
         self.train_function = train_function
+        self.evaluate_function = evaluate_function
         self.prepare_batch_function = prepare_batch_function
 
         self.__post_iteration_callback = []
@@ -106,12 +111,33 @@ class ModuleTrainer(object):
                 iteration_elapsed_time = time() - iteration_start
 
                 if self.verbose == 1:
-                    self.__update_progress_bar(iteration_elapsed_time, len(train_dataset_loader), max_epochs)
+                    self.__update_progress_bar(iteration_elapsed_time, len(train_dataloader), max_epochs)
 
             self.state.current_epoch += 1
             self.__run_post_epoch_callbacks()
 
         print("train time %.2f" % (time() - train_start))
+
+    def evaluate(self, dataloader: torch.utils.data.DataLoader, metric: Metric):
+        """
+        Evaluate a model.
+        :param dataloader:  PyTorch DataLoader that will be used to load the evaluation batches.
+        :param metric:  Metric object that will be used to compute the evaluation metric.
+        :return:    Computed metric after having evaluated the model across the entire dataloader.
+        """
+
+        previous_training_flag = self.model.training
+
+        self.model.eval()
+        metric.reset()
+
+        with torch.no_grad():
+            for batch in dataloader:
+                x, y, y_pred, _ = self.evaluate_function(batch)
+                metric.step(y, y_pred)
+
+        self.model.train(previous_training_flag)
+        return metric.compute()
 
     def add_progressbar_metric(self, format: str, callbacks: list):
         if not isinstance(format, str) or not isinstance(callbacks, list):
@@ -189,7 +215,7 @@ def create_default_trainer(model: nn.Module, optimizer: optim.Optimizer, criteri
                            device=None, dtype=None, non_blocking=False,
                            prepare_batch_function=batch_to_tensor,
                            loss_transform_function=lambda criterion, y_preds, y: criterion(y_preds, y),
-                           output_transform_function=lambda x, y, y_pred, loss: (x, y, y_pred, loss.item()),
+                           output_transform_function=lambda x, y, y_pred, loss: (x, y, y_pred, loss.item() if loss is not None else None),
                            init_callback=None,
                            verbose=1):
     """
@@ -237,8 +263,16 @@ def create_default_trainer(model: nn.Module, optimizer: optim.Optimizer, criteri
         # does y_pred need detach() ?
         return output_transform_function(x, y, y_pred, loss.detach())
 
+    def _default_evaluate_function(batch):
+        x, y, model_args = prepare_batch_function(batch, device=device, dtype=dtype, non_blocking=non_blocking)
+        y_pred = model(x, **model_args)
+
+        # does y_pred need detach() ?
+        return output_transform_function(x, y, y_pred, None)
+
     return ModuleTrainer(model, optimizer,
                          train_function=_default_train_function,
+                         evaluate_function=_default_evaluate_function,
                          prepare_batch_function=prepare_batch_function,
                          init_callback=init_callback,
                          verbose=verbose)

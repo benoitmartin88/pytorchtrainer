@@ -77,11 +77,11 @@ class ModuleTrainer(object):
         if self.verbose == 1:
             print(model)
 
-    def train(self, train_dataset_loader: torch.utils.data.DataLoader, max_epochs=100, stop_condition=NoStopping()):
+    def train(self, train_dataloader: torch.utils.data.DataLoader, max_epochs=100, stop_condition=NoStopping()):
         """
         Train the model using a given data-loader.
         Training will be stopped when `max_epochs` has been reached or if `stop_condition` returns True.
-        :param train_dataset_loader: PyTorch DataLoader that will be used to load training batches.
+        :param train_dataloader: PyTorch DataLoader that will be used to load training batches.
         :param max_epochs: Maximum number of epochs to run.
         :param stop_condition: Stop training loop based on a defined condition. By default training will not be stopped.
         """
@@ -94,7 +94,7 @@ class ModuleTrainer(object):
         while self.state.current_epoch < max_epochs and not stop_condition(self.state):
             self.model.zero_grad()
 
-            for self.state.current_iteration, batch in enumerate(train_dataset_loader):
+            for self.state.current_iteration, batch in enumerate(train_dataloader):
                 iteration_start = time()
                 self.state.current_iteration += 1
 
@@ -166,20 +166,20 @@ class ModuleTrainer(object):
             if frequency != 0 and self.state.current_epoch % frequency == 0:
                 callback(self)
 
-    def __update_progress_bar(self, iteration_elapsed_time, train_dataset_loader_size, max_epochs):
-        remaining_time_estimation = int(iteration_elapsed_time * (train_dataset_loader_size - self.state.current_iteration))
+    def __update_progress_bar(self, iteration_elapsed_time, train_dataloader_size, max_epochs):
+        remaining_time_estimation = int(iteration_elapsed_time * (train_dataloader_size - self.state.current_iteration))
 
         if len(self.extra_progressbar_metrics) > 0:
             suffix = ("%d/%d | %.2f s/it | %s remaining | train loss %.4f | " + self.extra_progressbar_metrics[0]) % \
-                     (self.state.current_iteration, train_dataset_loader_size, iteration_elapsed_time,
+                     (self.state.current_iteration, train_dataloader_size, iteration_elapsed_time,
                       str(datetime.timedelta(seconds=remaining_time_estimation)), self.state.last_train_loss,
                       *[getattr(self.state, a.state_attribute_name) for a in self.extra_progressbar_metrics[1]])
         else:
             suffix = "%d/%d | %.2f s/it | %s remaining | train loss %.4f" % \
-                     (self.state.current_iteration, train_dataset_loader_size, iteration_elapsed_time,
+                     (self.state.current_iteration, train_dataloader_size, iteration_elapsed_time,
                       str(datetime.timedelta(seconds=remaining_time_estimation)), self.state.last_train_loss)
 
-        print_progress(self.state.current_iteration, train_dataset_loader_size,
+        print_progress(self.state.current_iteration, train_dataloader_size,
                        bar_length=25,
                        prefix="epoch %d/%d" % (self.state.current_epoch + 1, max_epochs),
                        suffix=suffix)

@@ -12,8 +12,8 @@ from test.common import XorModule, XorDataset
 
 
 class MyValidationCallback(ValidationCallback):
-    def __init__(self, dataset_loader, metric):
-        super().__init__(dataset_loader, metric)
+    def __init__(self, dataloader, metric):
+        super().__init__(dataloader, metric)
         self.has_been_called = False
         self.number_of_calls = 0
 

@@ -143,7 +143,7 @@ class TestTrainer(unittest.TestCase):
         self.assertEqual(2, trainer.state.current_epoch)
 
     def test_checkpoint_load_from_trainer(self):
-        from callback.checkpoint import default_save_diretory, default_filename
+        from pytorchtrainer.callback.checkpoint import default_save_diretory, default_filename
         from pytorchtrainer import State
 
         trainer = create_default_trainer(self.model, self.optimizer, self.criterion)

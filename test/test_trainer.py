@@ -112,7 +112,7 @@ class TestTrainer(unittest.TestCase):
 
         self.assertTrue(os.path.exists(os.path.join(checkpoint.default_save_diretory, checkpoint.default_filename)))
 
-    def test_checkpoint_load(self):
+    def test_checkpoint_load_from_init_callback(self):
         trainer = create_default_trainer(self.model, self.optimizer, self.criterion)
         trainer.register_post_epoch_callback(checkpoint.SaveCheckpointCallback())
         trainer.train(self.train_loader, max_epochs=1)
@@ -141,6 +141,20 @@ class TestTrainer(unittest.TestCase):
         trainer.train(self.train_loader, max_epochs=2)
 
         self.assertEqual(2, trainer.state.current_epoch)
+
+    def test_checkpoint_load_from_trainer(self):
+        from callback.checkpoint import default_save_diretory, default_filename
+        from pytorchtrainer import State
+
+        trainer = create_default_trainer(self.model, self.optimizer, self.criterion)
+        trainer.register_post_epoch_callback(checkpoint.SaveCheckpointCallback())
+        trainer.train(self.train_loader, max_epochs=1)
+
+        self.assertTrue(os.path.exists(os.path.join(checkpoint.default_save_diretory, checkpoint.default_filename)))
+
+        trainer.load(save_directory=default_save_diretory, filename=default_filename)
+
+        self.assertEqual(State(), trainer.state)
 
     def test_log_save(self):
         writer = file_writer.CsvWriter(extra_header=['test'], extra_data_function=lambda trainer: [42])

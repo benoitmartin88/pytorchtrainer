@@ -7,12 +7,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 # Unreleased
 ## New
-- `ModuleTrainer.evaluate` method
+- Add `ModuleTrainer.evaluate` method
 - Add CsvWriter to evaluate method
 - Add `filename_transform_function` argument to `SaveBestCheckpointCallback`
 - Metric step method now return the intermediate computed values
 - Rename `CsvWriter`'s `extra` argument to `extra_data_function`
 - `CsvWriter` can now be called with the `extra_data` extra argument to define the extra data that will be logged
+- Add `ModuleTrainer.load` method
 
 ## Change
 - Rename `dateset_loader` to `dataloader`

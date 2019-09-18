@@ -9,7 +9,7 @@ import torch.nn as nn
 import torch.optim as optim
 
 from .metric import Metric
-from .callback import Callback, CsvWriter
+from .callback import Callback, CsvWriter, LoadCheckpointCallback
 from .stop_condition import NoStopping
 from .utils import print_progress, batch_to_tensor
 
@@ -35,6 +35,25 @@ class State(object):
 
     def get(self, attribute_name: str):
         return getattr(self, attribute_name)
+
+    def reset(self):
+        self.current_epoch = 0
+        self.current_iteration = 1
+        self.last_x = None
+        self.last_y = None
+        self.last_y_pred = None
+        self.last_train_loss = float("inf")
+
+    def __eq__(self, other):
+        if not isinstance(other, State):
+            return NotImplemented
+
+        return self.current_epoch == other.current_epoch \
+               and self.current_iteration == other.current_iteration \
+               and self.last_x == other.last_x \
+               and self.last_y == other.last_y \
+               and self.last_y_pred == other.last_y_pred \
+               and self.last_train_loss == other.last_train_loss
 
 
 class ModuleTrainer(object):
@@ -146,6 +165,16 @@ class ModuleTrainer(object):
 
         self.model.train(previous_training_flag)
         return metric.compute()
+
+    def load(self, save_directory: str, filename: str):
+        """
+        Load a previously saved checkpoint.
+        :param save_directory: path to the saved checkpoint folder
+        :param filename: checkpoint filename
+        :return:
+        """
+        LoadCheckpointCallback(save_directory, filename)(self)
+        self.state.reset()
 
     def add_progressbar_metric(self, format: str, callbacks: list):
         if not isinstance(format, str) or not isinstance(callbacks, list):

@@ -43,4 +43,12 @@ class CsvWriter(Callback):
                     if not isinstance(extra_data, list):
                         raise TypeError("callback should return a list.")
 
-            writer.writerow([time.time(), trainer_state.current_epoch+1, trainer_state.current_iteration+1, trainer_state.last_train_loss] + extra_data)
+            if len(extra_data) >= 1 and not isinstance(extra_data[0], list):
+                # extra_data -> [0, 42, 51]
+                writer.writerow([time.time(), trainer_state.current_epoch+1, trainer_state.current_iteration+1, trainer_state.last_train_loss] + extra_data)
+            else:
+                # extra_data -> [[], [], []]
+                for data in extra_data:
+                    if not isinstance(data, list):
+                        raise TypeError("callback should return a list.")
+                    writer.writerow([time.time(), trainer_state.current_epoch + 1, trainer_state.current_iteration + 1, trainer_state.last_train_loss] + data)

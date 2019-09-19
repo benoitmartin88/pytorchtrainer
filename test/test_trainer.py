@@ -72,7 +72,7 @@ class TestTrainer(unittest.TestCase):
 
         res = trainer.evaluate(self.train_loader, metric=Accuracy(prediction_transform=lambda y_pred: self.prediction_transform(y_pred)),
                                csv_writer=CsvWriter(extra_header=["y", "y_pred", "loss"]),
-                               csv_writer_extra_data_function=lambda x, y, y_pred, loss: [y.item(), y_pred.item(), loss.item()])
+                               csv_writer_extra_data_function=lambda x, y, y_pred, loss, batch: [y.item(), y_pred.item(), loss.item()])
         print("%.1f" % res)
         self.assertAlmostEqual(res, 1.0)
         self.assertEqual(previous_training_flag, trainer.model.training)

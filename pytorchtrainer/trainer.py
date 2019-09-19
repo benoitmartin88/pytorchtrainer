@@ -138,7 +138,7 @@ class ModuleTrainer(object):
         print("train time %.2f" % (time() - train_start))
 
     def evaluate(self, dataloader: torch.utils.data.DataLoader, metric: Metric,
-                 csv_writer: CsvWriter = None, csv_writer_extra_data_function=lambda x, y, y_pred, loss: list()):
+                 csv_writer: CsvWriter = None, csv_writer_extra_data_function=lambda x, y, y_pred, loss, batch: list()):
         """
         Evaluate a model.
         :param dataloader:  PyTorch DataLoader that will be used to load the evaluation batches.
@@ -161,7 +161,7 @@ class ModuleTrainer(object):
                 x, y, y_pred, _ = self.evaluate_function(batch)
                 loss = metric.step(y, y_pred)
 
-                csv_writer(self, extra_data=csv_writer_extra_data_function(x, y, y_pred, loss))
+                csv_writer(self, extra_data=csv_writer_extra_data_function(x, y, y_pred, loss, batch))
 
         self.model.train(previous_training_flag)
         return metric.compute()

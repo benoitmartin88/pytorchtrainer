@@ -75,7 +75,9 @@ class SaveBestCheckpointCallback(SaveCheckpointCallback):
         # self.saves_to_keep = saves_to_keep    # TODO
         self.comparison_function = comparison_function
         self.current_best = None
-        self.filename_transform_function = filename_transform_function
+
+        if filename_transform_function is None:
+            self.filename_transform_function = self._default_filename_transform_function
 
         os.makedirs(self.save_directory, exist_ok=True)
 
@@ -89,9 +91,7 @@ class SaveBestCheckpointCallback(SaveCheckpointCallback):
             self.current_best = trainer.state.get(self.state_metric_name)
 
             old_filename = self.filename
-
-            if self.filename_transform_function is not None:
-                self.filename = self.filename_transform_function(self.filename, trainer.state)
+            self.filename = self.filename_transform_function(self.filename, trainer.state)
 
             self._save_checkpoint(trainer.model, trainer.optimizer, trainer.state)
             self.filename = old_filename

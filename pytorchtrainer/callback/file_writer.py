@@ -10,12 +10,12 @@ default_filename = 'log.cvs'
 
 class CsvWriter(Callback):
     def __init__(self, save_directory=default_save_directory, filename=default_filename, delimiter=';',
-                 extra_header=None, callback=None):
+                 extra_header=None, extra_data_function=None):
         super().__init__()
         file, ext = filename.rsplit('.', 1)
         self.log_file_path = os.path.join(save_directory, file + '_' + time.strftime("%Y%m%d_%H%M%S") + '.' + ext)
         self.delimiter = delimiter
-        self.callback = callback
+        self.extra_data_function = extra_data_function
 
         os.makedirs(save_directory, exist_ok=True)
 
@@ -29,17 +29,26 @@ class CsvWriter(Callback):
             writer = csv.writer(writer, delimiter=delimiter, quotechar='"', quoting=csv.QUOTE_MINIMAL)
             writer.writerow(header)
 
-    def __call__(self, trainer):
-        self.__save(trainer.state)
+    def __call__(self, trainer, extra_data: list = None):
+        self.__save(trainer.state, extra_data)
 
-    def __save(self, trainer_state):
+    def __save(self, trainer_state, extra_data: list = None):
         with open(self.log_file_path, mode='a') as writer:
             writer = csv.writer(writer, delimiter=self.delimiter, quotechar='"', quoting=csv.QUOTE_MINIMAL)
 
-            extra = []
-            if self.callback is not None:
-                extra = self.callback(trainer_state)
-                if not isinstance(extra, list):
-                    raise TypeError("callback should return a list.")
+            if extra_data is None:
+                extra_data = []
+                if self.extra_data_function is not None:
+                    extra_data = self.extra_data_function(trainer_state)
+                    if not isinstance(extra_data, list):
+                        raise TypeError("callback should return a list.")
 
-            writer.writerow([time.time(), trainer_state.current_epoch+1, trainer_state.current_iteration+1, trainer_state.last_train_loss] + extra)
+            if len(extra_data) >= 1 and not isinstance(extra_data[0], list):
+                # extra_data -> [0, 42, 51]
+                writer.writerow([time.time(), trainer_state.current_epoch+1, trainer_state.current_iteration+1, trainer_state.last_train_loss] + extra_data)
+            else:
+                # extra_data -> [[], [], []]
+                for data in extra_data:
+                    if not isinstance(data, list):
+                        raise TypeError("callback should return a list.")
+                    writer.writerow([time.time(), trainer_state.current_epoch + 1, trainer_state.current_iteration + 1, trainer_state.last_train_loss] + data)

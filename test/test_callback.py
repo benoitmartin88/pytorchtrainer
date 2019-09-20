@@ -12,8 +12,8 @@ from test.common import XorModule, XorDataset
 
 
 class MyValidationCallback(ValidationCallback):
-    def __init__(self, dataset_loader, metric):
-        super().__init__(dataset_loader, metric)
+    def __init__(self, dataloader, metric):
+        super().__init__(dataloader, metric)
         self.has_been_called = False
         self.number_of_calls = 0
 
@@ -74,7 +74,7 @@ class TestCallback(unittest.TestCase):
         trainer = create_default_trainer(self.model, self.optimizer, self.criterion)
         trainer.register_post_iteration_callback(validation_callback, frequency=1)
         trainer.register_post_iteration_callback(file_writer.CsvWriter(extra_header=[validation_callback.state_attribute_name],
-                                                                       callback=lambda state: [state.get(validation_callback.state_attribute_name)]), frequency=1)
+                                                                       extra_data_function=lambda state: [state.get(validation_callback.state_attribute_name)]), frequency=1)
         trainer.register_post_epoch_callback(validation_callback, frequency=1)
         trainer.train(self.train_loader, max_epochs=5)
 

@@ -68,18 +68,22 @@ class LoadCheckpointCallback(Callback):
 
 class SaveBestCheckpointCallback(SaveCheckpointCallback):
     def __init__(self, state_metric_name: str, saves_to_keep=5, comparison_function=lambda metric, best: metric < best,
-                 save_directory=default_save_diretory, filename=default_best_filename):
+                 save_directory=default_save_diretory, filename=default_best_filename,
+                 filename_transform_function=None):
         super().__init__(save_directory, filename)
         self.state_metric_name = state_metric_name
         # self.saves_to_keep = saves_to_keep    # TODO
         self.comparison_function = comparison_function
         self.current_best = None
 
+        if filename_transform_function is None:
+            self.filename_transform_function = self._default_filename_transform_function
+
         os.makedirs(self.save_directory, exist_ok=True)
 
     def __call__(self, trainer):
         """
-        best.pt.tar -> best_METRIC_EPOCH_1.pt.tar
+        best.pt.tar -> best_EPOCH_METRIC_1.pt.tar
         :param trainer:
         :return:
         """
@@ -87,12 +91,14 @@ class SaveBestCheckpointCallback(SaveCheckpointCallback):
             self.current_best = trainer.state.get(self.state_metric_name)
 
             old_filename = self.filename
-            self.filename = self._get_filename(trainer.state)
+            self.filename = self.filename_transform_function(self.filename, trainer.state)
+
             self._save_checkpoint(trainer.model, trainer.optimizer, trainer.state)
             self.filename = old_filename
 
-    def _get_filename(self, state):
-        c = self.filename.count('.')
-        base, *ext = self.filename.rsplit('.', c)
+    @staticmethod
+    def _default_filename_transform_function(filename, state):
+        c = filename.count('.')
+        base, *ext = filename.rsplit('.', c)
         return base + "_%d_%.2f_%d." % (state.current_epoch, state.last_train_loss, 1) + '.'.join(ext)
 

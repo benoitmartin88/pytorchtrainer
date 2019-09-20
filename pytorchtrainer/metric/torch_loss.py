@@ -11,8 +11,10 @@ class TorchLoss(Metric):
         self._total = 0
 
     def step(self, y: torch.Tensor, y_pred: torch.Tensor):
-        self._loss_sum += self.loss_function(y_pred, y).item()
+        loss = self.loss_function(y_pred, y)
+        self._loss_sum += loss.item()
         self._total += 1
+        return loss
 
     def compute(self):
         if self._total == 0:

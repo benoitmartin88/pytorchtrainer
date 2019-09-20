@@ -1,5 +1,5 @@
 
-__version__ = '0.2.0rc4'
+__version__ = '0.2.0'
 
 
 from .trainer import create_default_trainer, ModuleTrainer, State

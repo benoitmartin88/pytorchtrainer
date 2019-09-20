@@ -161,7 +161,7 @@ class ModuleTrainer(object):
                 x, y, y_pred, _ = self.evaluate_function(batch)
                 loss = metric.step(y, y_pred)
 
-                csv_writer(self, extra_data=csv_writer_extra_data_function(x, y, y_pred, loss, batch))
+                csv_writer(self, extra_data=csv_writer_extra_data_function(x, y, y_pred, loss, batch))      # TODO: remove x and y. only keep batch ?
 
         self.model.train(previous_training_flag)
         return metric.compute()

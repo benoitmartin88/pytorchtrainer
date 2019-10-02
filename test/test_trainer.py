@@ -33,7 +33,7 @@ class TestTrainer(unittest.TestCase):
 
     def tearDown(self):
         super().tearDown()
-        shutil.rmtree(os.path.join(checkpoint.default_save_diretory), ignore_errors=True)
+        shutil.rmtree(os.path.join(checkpoint.default_save_directory), ignore_errors=True)
         shutil.rmtree(os.path.join(file_writer.default_save_directory), ignore_errors=True)
         del self.model, self.optimizer, self.criterion, self.train_loader
 
@@ -110,14 +110,14 @@ class TestTrainer(unittest.TestCase):
         trainer.register_post_epoch_callback(checkpoint.SaveCheckpointCallback())
         trainer.train(self.train_loader, max_epochs=1)
 
-        self.assertTrue(os.path.exists(os.path.join(checkpoint.default_save_diretory, checkpoint.default_filename)))
+        self.assertTrue(os.path.exists(os.path.join(checkpoint.default_save_directory, checkpoint.default_filename)))
 
     def test_checkpoint_load_from_init_callback(self):
         trainer = create_default_trainer(self.model, self.optimizer, self.criterion)
         trainer.register_post_epoch_callback(checkpoint.SaveCheckpointCallback())
         trainer.train(self.train_loader, max_epochs=1)
 
-        self.assertTrue(os.path.exists(os.path.join(checkpoint.default_save_diretory, checkpoint.default_filename)))
+        self.assertTrue(os.path.exists(os.path.join(checkpoint.default_save_directory, checkpoint.default_filename)))
 
         del trainer
 
@@ -143,16 +143,16 @@ class TestTrainer(unittest.TestCase):
         self.assertEqual(2, trainer.state.current_epoch)
 
     def test_checkpoint_load_from_trainer(self):
-        from pytorchtrainer.callback.checkpoint import default_save_diretory, default_filename
+        from pytorchtrainer.callback.checkpoint import default_save_directory, default_filename
         from pytorchtrainer import State
 
         trainer = create_default_trainer(self.model, self.optimizer, self.criterion)
         trainer.register_post_epoch_callback(checkpoint.SaveCheckpointCallback())
         trainer.train(self.train_loader, max_epochs=1)
 
-        self.assertTrue(os.path.exists(os.path.join(checkpoint.default_save_diretory, checkpoint.default_filename)))
+        self.assertTrue(os.path.exists(os.path.join(checkpoint.default_save_directory, checkpoint.default_filename)))
 
-        trainer.load(save_directory=default_save_diretory, filename=default_filename)
+        trainer.load(save_directory=default_save_directory, filename=default_filename)
 
         self.assertEqual(State(), trainer.state)
 

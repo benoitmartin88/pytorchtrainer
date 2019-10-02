@@ -5,13 +5,13 @@ import os
 
 from .callback import Callback
 
-default_save_diretory = './checkpoint'
+default_save_directory = './checkpoint'
 default_filename = 'checkpoint.pt.tar'
 default_best_filename = 'best.pt.tar'
 
 
 class SaveCheckpointCallback(Callback):
-    def __init__(self, save_directory=default_save_diretory, filename=default_filename):
+    def __init__(self, save_directory=default_save_directory, filename=default_filename):
         super().__init__()
         self.save_directory = save_directory
         self.filename = filename
@@ -35,7 +35,7 @@ class SaveCheckpointCallback(Callback):
 
 
 class LoadCheckpointCallback(Callback):
-    def __init__(self, save_directory=default_save_diretory, filename=default_filename, callback=None):
+    def __init__(self, save_directory=default_save_directory, filename=default_filename, callback=None):
         super().__init__()
         self.save_directory = save_directory
         self.filename = filename
@@ -68,7 +68,7 @@ class LoadCheckpointCallback(Callback):
 
 class SaveBestCheckpointCallback(SaveCheckpointCallback):
     def __init__(self, state_metric_name: str, saves_to_keep=5, comparison_function=lambda metric, best: metric < best,
-                 save_directory=default_save_diretory, filename=default_best_filename,
+                 save_directory=default_save_directory, filename=default_best_filename,
                  filename_transform_function=None):
         super().__init__(save_directory, filename)
         self.state_metric_name = state_metric_name

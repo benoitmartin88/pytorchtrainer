@@ -61,7 +61,7 @@ class TestCallback(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         super().tearDownClass()
-        shutil.rmtree(os.path.join(checkpoint.default_save_diretory), ignore_errors=True)
+        shutil.rmtree(os.path.join(checkpoint.default_save_directory), ignore_errors=True)
         shutil.rmtree(os.path.join(file_writer.default_save_directory), ignore_errors=True)
 
     def test_frequency_error(self):

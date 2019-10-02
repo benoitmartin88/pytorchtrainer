@@ -34,11 +34,10 @@ jobs:
             pip install -q -U twine wheel setuptools tox
             curl https://pyenv.run | bash
 
-            cat >> ~/.profile <<EOL
-            export PATH="/home/circleci/.pyenv/bin:$PATH"
-            eval "$(pyenv init -)"
-            eval "$(pyenv virtualenv-init -)"
-            EOL
+            rm ~/.pyenv.env
+            echo 'export PATH="/home/circleci/.pyenv/bin:$PATH"' >> ~/.pyenv.env
+            echo 'eval "$(pyenv init -)"' >> ~/.pyenv.env
+            echo 'eval "$(pyenv virtualenv-init -)"' >> ~/.pyenv.env
 
             ls -alh
             ls -alh ~
@@ -63,7 +62,7 @@ jobs:
           command: |
             ls -alh
             python3 -m venv venv
-            . ~/.profile
+            . ~/.pyenv.env
             . venv/bin/activate
             ./tox_run.sh
 

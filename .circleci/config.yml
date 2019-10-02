@@ -46,6 +46,8 @@ jobs:
           paths:
             - venv
             - ~/.cache
+            - ~/.pyenv.env
+            - ~/.pyenv
           key: v3-pip-packages-{{ .Branch }}-{{ checksum "requirements.txt" }}
 
   test:

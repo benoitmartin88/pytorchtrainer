@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-SCRIPT_PATH="$( cd "$(dirname "$0")" ; pwd -P )"
-TOX_DIR=${SCRIPT_PATH}/../.tox
 PYENV_VERSION_DIR=${HOME}/.pyenv/versions
 
 # check that required tools are installed
@@ -18,8 +16,3 @@ for PYTHON_VERSION in "${PYTHON_VERSIONS[@]}"; do
     pyenv install -s ${PYTHON_VERSION}
     PATH=${PYENV_VERSION_DIR}/${PYTHON_VERSION}/bin:${PATH}
 done
-
-
-# run tox: execute tests on multiple python versions
-#tox -p auto -q
-tox

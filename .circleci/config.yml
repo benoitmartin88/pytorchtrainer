@@ -39,6 +39,8 @@ jobs:
             echo 'eval "$(pyenv init -)"' >> ~/.pyenv.env
             echo 'eval "$(pyenv virtualenv-init -)"' >> ~/.pyenv.env
 
+            ./setup_pyenvs.sh
+
             ls -alh
             ls -alh ~
 
@@ -66,7 +68,7 @@ jobs:
             python3 -m venv venv
             . ~/.pyenv.env
             . venv/bin/activate
-            ./tox_run.sh
+            tox
 
   build:
     docker:

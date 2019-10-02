@@ -34,7 +34,7 @@ jobs:
             pip install -q -U twine wheel setuptools tox
             curl https://pyenv.run | bash
 
-            rm ~/.pyenv.env
+            rm -f ~/.pyenv.env
             echo 'export PATH="/home/circleci/.pyenv/bin:$PATH"' >> ~/.pyenv.env
             echo 'eval "$(pyenv init -)"' >> ~/.pyenv.env
             echo 'eval "$(pyenv virtualenv-init -)"' >> ~/.pyenv.env

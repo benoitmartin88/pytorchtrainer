@@ -188,3 +188,31 @@ class TestTrainer(unittest.TestCase):
         self.assertRaises(TypeError, trainer.add_progressbar_metric, None, [])
         self.assertRaises(TypeError, trainer.add_progressbar_metric, "", [None])
         self.assertRaises(RuntimeError, trainer.add_progressbar_metric, "", [CsvWriter()])
+
+    def test_sigint(self):
+        max_epoch = 100
+
+        def _run(q):
+            print("_run from sub-process")
+            trainer = create_default_trainer(self.model, self.optimizer, self.criterion)
+            trainer.train(self.train_loader, max_epochs=max_epoch)
+            q.put(trainer.state.current_epoch)
+
+        import multiprocessing as mp
+        import os
+        import signal
+        import time
+
+        q = mp.Queue()
+        p = mp.Process(target=_run, args=(q,))
+        p.start()
+
+        # wait 1 second before sending sigint
+        time.sleep(1)
+        os.kill(p.pid, signal.SIGINT)
+
+        last_epoch = q.get()
+
+        p.join()
+
+        self.assertLess(last_epoch, max_epoch)

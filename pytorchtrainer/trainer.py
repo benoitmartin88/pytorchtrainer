@@ -80,6 +80,7 @@ class ModuleTrainer(object):
         signal.signal(signal.SIGINT, self.__graceful_exit)
 
         self.state = State()
+        self.stop_condition = None
         self.model = model
         self.optimizer = optimizer
         self.train_function = train_function
@@ -112,10 +113,11 @@ class ModuleTrainer(object):
         if not callable(stop_condition):
             raise TypeError("Argument stop_condition should be a function.")
 
+        self.stop_condition = stop_condition
         self.model.train()  # set the module to training mode
 
         train_start = time()
-        while self.state.current_epoch < max_epochs and not stop_condition(self.state):
+        while self.state.current_epoch < max_epochs and not self.stop_condition(self.state):
             self.model.zero_grad()
 
             for self.state.current_iteration, batch in enumerate(train_dataloader):

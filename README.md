@@ -49,7 +49,7 @@ trainer.register_post_epoch_callback(validation_callback)
 # optionally save training and validation loss after every iteration using default save directory
 trainer.register_post_iteration_callback(ptt.callback.CsvWriter(save_every=1,
                                                                 extra_header=[validation_callback.state_attribute_name],
-                                                                callback=lambda state: [state.get(validation_callback.state_attribute_name)]))
+                                                                extra_data_function=lambda state: [state.get(validation_callback.state_attribute_name)]))
 # run the training
 trainer.train(train_loader, max_epochs=100)
 
